@@ -161,9 +161,29 @@
                     </div>
                     <div class="form-group form-group-half">
                         <label>পরিমাণ</label>
-                        <input type="number" name="quantity" value="1" min="1" max="20" />
+                        <input type="number" name="quantity" id="quantityInput" value="1" min="1" max="20" oninput="calcTotal()" />
                     </div>
                 </div>
+                <div class="form-row form-price-row">
+                    <div class="form-group">
+                        <label>মূল্য (প্রতি সেট)</label>
+                        <div class="price-display" id="priceDisplay">প্রোডাক্ট সিলেক্ট করুন</div>
+                        <input type="hidden" name="price" id="priceInput" value="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>ডিসকাউন্ট (৳)</label>
+                        <input type="number" name="discount" id="discountInput" value="0" min="0" oninput="calcTotal()" />
+                    </div>
+                    <div class="form-group">
+                        <label>ডেলিভারি চার্জ (৳)</label>
+                        <input type="number" name="delivery" id="deliveryInput" value="60" min="0" oninput="calcTotal()" />
+                    </div>
+                </div>
+                <div class="total-box" id="totalBox">
+                    <span>মোট payable: </span>
+                    <strong id="totalAmount">৳০</strong>
+                </div>
+                <input type="hidden" name="total" id="totalInput" value="0" />
                 <div class="form-group">
                     <label>বিশেষ নোট (ঐচ্ছিক)</label>
                     <textarea name="note" rows="2" placeholder="কিছু বিশেষ অনুরোধ থাকলে লিখুন"></textarea>

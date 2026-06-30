@@ -410,6 +410,28 @@ ul { list-style: none; }
     padding: 1rem;
     font-size: 1.1rem;
 }
+.form-price-row { grid-template-columns: 1fr 1fr 1fr; }
+.price-display {
+    padding: 0.8rem 1rem;
+    background: #f0e4d9;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #c0392b;
+    font-size: 1.1rem;
+}
+.total-box {
+    background: #fdf8f4;
+    border: 2px solid #c0392b;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+}
+.total-box strong {
+    font-size: 1.5rem;
+    color: #c0392b;
+}
 .form-note {
     text-align: center;
     font-size: 0.85rem;
@@ -524,7 +546,8 @@ ul { list-style: none; }
         text-align: center;
     }
     .about-stats { justify-content: center; }
-    .form-row { grid-template-columns: 1fr; }
+    .form-row,
+    .form-price-row { grid-template-columns: 1fr; }
     .product-grid { grid-template-columns: repeat(2, 1fr); }
 }
 

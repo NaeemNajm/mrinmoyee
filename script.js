@@ -93,12 +93,45 @@ function selectProduct(id) {
         for (let opt of productSelect.options) {
             if (opt.value === `${product.name} - ৳${product.price}`) {
                 opt.selected = true;
+                updatePrice();
                 break;
             }
         }
     }
 
     orderForm?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function updatePrice() {
+    const select = document.getElementById('productSelect');
+    const display = document.getElementById('priceDisplay');
+    const input = document.getElementById('priceInput');
+    if (!select || !display) return;
+
+    const val = select.value;
+    const match = val.match(/৳(\d+)/);
+    if (match) {
+        const price = parseInt(match[1]);
+        display.textContent = `৳${price}`;
+        display.style.color = '#c0392b';
+        input.value = price;
+    } else {
+        display.textContent = 'প্রোডাক্ট সিলেক্ট করুন';
+        display.style.color = '#7f6b5e';
+        input.value = 0;
+    }
+    calcTotal();
+}
+
+function calcTotal() {
+    const price = parseInt(document.getElementById('priceInput')?.value || 0);
+    const qty = parseInt(document.getElementById('quantityInput')?.value || 1);
+    const discount = parseInt(document.getElementById('discountInput')?.value || 0);
+    const delivery = parseInt(document.getElementById('deliveryInput')?.value || 0);
+    const total = (price * qty) - discount + delivery;
+
+    document.getElementById('totalAmount').textContent = `৳${total}`;
+    document.getElementById('totalInput').value = total;
 }
 
 // ========== Filter Buttons ==========
@@ -123,6 +156,9 @@ function populateSelect() {
         opt.textContent = `${p.name} - ৳${p.price}`;
         select.appendChild(opt);
     });
+
+    select.addEventListener('change', updatePrice);
+    document.getElementById('deliveryInput')?.addEventListener('change', calcTotal);
 }
 
 // ========== Hamburger Menu ==========
