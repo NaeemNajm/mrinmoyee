@@ -36,259 +36,366 @@
 3. নিচের সম্পূর্ণ কোড কপি-পেস্ট করুন এবং **Save** করুন:
 
 ```javascript
-// মৃন্ময়ী - অর্ডার ম্যানেজমেন্ট সিস্টেম v2 (মূল্য+ডিসকাউন্ট+ডেলিভারি সহ)
+// ========================================
+// মৃন্ময়ী - Mrinmoyee অর্ডার ম্যানেজমেন্ট v4
+// ইংরেজি ফাংশন নাম (web app এরর এড়াতে)
+// ========================================
 
-const হেডার = ['সময়', 'নাম', 'মোবাইল', 'ঠিকানা', 'প্রোডাক্ট', 'সাইজ', 'পরিমাণ', 'মূল্য', 'ডিসকাউন্ট', 'ডেলিভারি চার্জ', 'নেট টোটাল', 'নোট', 'স্ট্যাটাস'];
-const ড্যাশবোর্ড_শীট = '📊 সারাংশ';
-const অর্ডার_শীট = '📦 অর্ডার';
+var HEADERS = ['সময়', 'নাম', 'মোবাইল', 'হোয়াটসঅ্যাপ', 'ঠিকানা', 'ডেলিভারি এরিয়া', 'ডেলিভারি চার্জ', 'পেমেন্ট', 'প্রোডাক্ট', 'সাইজ', 'পরিমাণ', 'মূল্য', 'নোট', 'নেট টোটাল', 'স্ট্যাটাস', 'WhatsApp লিংক'];
+var DASHBOARD_SHEET = '📊 সারাংশ';
+var ORDER_SHEET = '📦 অর্ডার';
+var STATUS_LIST = ['⏳ পেন্ডিং', '🔧 প্রসেসিং', '📦 শিপড', '✅ ডেলিভারড', '❌ বাতিল'];
+var STATUS_COL = 15;
+var WHATSAPP_COL = 16;
 
-/* ===== অন ওপেন — কাস্টম মেনু ===== */
+/* ===== Custom Menu ===== */
 function onOpen() {
-  const ui = SpreadsheetApp.getUi();
+  var ui = SpreadsheetApp.getUi();
   ui.createMenu('📋 মৃন্ময়ী')
-    .addItem('⏳ শুধু পেন্ডিং দেখান', 'ফিল্টার_পেন্ডিং')
-    .addItem('✅ ডান দেখান', 'ফিল্টার_ডান')
-    .addItem('🔄 সব দেখান', 'ফিল্টার_সব')
+    .addItem('⏳ পেন্ডিং', 'filterPending')
+    .addItem('🔧 প্রসেসিং', 'filterProcessing')
+    .addItem('📦 শিপড', 'filterShipped')
+    .addItem('✅ ডেলিভারড', 'filterDelivered')
+    .addItem('🔄 সব দেখান', 'filterAll')
     .addSeparator()
-    .addItem('✓ সিলেক্টেড অর্ডার ডান করুন', 'ডান_করুন')
-    .addItem('📊 ড্যাশবোর্ড রিফ্রেশ', 'রিফ্রেশ_ড্যাশবোর্ড')
+    .addItem('📊 ড্যাশবোর্ড রিফ্রেশ', 'refreshDashboard')
     .addToUi();
 }
 
-/* ===== ওয়েব অ্যাপ হ্যান্ডলার ===== */
-function doGet(e) { return হ্যান্ডেল_করুন(e); }
-function doPost(e) { return হ্যান্ডেল_করুন(e); }
+/* ===== Web App Handler ===== */
+function doGet(e) { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
 
-function হ্যান্ডেল_করুন(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  শীট_নিশ্চিত_করুন(ss);
-  const শীট = ss.getSheetByName(অর্ডার_শীট);
-  const params = e ? e.parameter : {};
+function handleRequest(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ensureSheets(ss);
+  var sheet = ss.getSheetByName(ORDER_SHEET);
+  var params = e ? e.parameter : {};
 
-  if (শীট.getLastRow() === 0) {
-    শীট.appendRow(হেডার);
-    হেডার_ফরম্যাট(শীট);
-    ফিল্টার_সেটআপ(শীট);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(HEADERS);
+    formatHeader(sheet);
   }
 
-  const qty = parseInt(params.quantity) || 1;
-  const price = parseInt(params.price) || 0;
-  const discount = parseInt(params.discount) || 0;
-  const delivery = parseInt(params.delivery) || 0;
-  const total = (price * qty) - discount + delivery;
+  var qty = parseInt(params.quantity) || 1;
+  var price = parseInt(params.price) || 0;
+  var deliveryCharge = parseInt(params.delivery_charge) || 0;
+  var total = (price * qty) + deliveryCharge;
 
-  const সারি = [
+  var row = [
     new Date(),
     params.name || '',
     params.phone || '',
+    params.whatsapp || '',
     params.address || '',
+    params.delivery_area || '',
+    deliveryCharge,
+    params.payment_method || 'COD',
     params.product || '',
     params.size || '',
     qty,
     price,
-    discount,
-    delivery,
-    total,
     params.note || '',
-    '⏳ পেন্ডিং'
+    total,
+    '⏳ পেন্ডিং',
+    ''
   ];
-  শীট.appendRow(সারি);
-  সারি_ফরম্যাট(শীট, শীট.getLastRow());
-  ড্যাশবোর্ড_আপডেট(ss);
+
+  sheet.appendRow(row);
+  var lastRow = sheet.getLastRow();
+  formatRow(sheet, lastRow);
+  setStatusDropdown(sheet, lastRow);
+  setWhatsAppLink(sheet, lastRow);
+  updateDashboard(ss);
 
   return ContentService
     .createTextOutput(JSON.stringify({ success: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/* ===== ফিল্টার ===== */
-function ফিল্টার_পেন্ডিং() {
-  const শীট = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(অর্ডার_শীট);
-  if (!শীট || শীট.getLastRow() < 1) return;
-  শীট.getFilter()?.remove();
-  const রেঞ্জ = শীট.getRange(1, 1, শীট.getLastRow(), 13);
-  const ফিল্টার = রেঞ্জ.createFilter();
-  ফিল্টার.setColumnFilterCriteria(13, SpreadsheetApp.newFilterCriteria()
-    .setVisibleValues(['⏳ পেন্ডিং']).build());
+/* ===== Status Dropdown with Colors ===== */
+function setStatusDropdown(sheet, row) {
+  var range = sheet.getRange(row, STATUS_COL);
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(STATUS_LIST, true)
+    .setAllowInvalid(false)
+    .build();
+  range.setDataValidation(rule);
+  applyStatusStyle(sheet, row, range.getValue());
 }
 
-function ফিল্টার_ডান() {
-  const শীট = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(অর্ডার_শীট);
-  if (!শীট || শীট.getLastRow() < 1) return;
-  শীট.getFilter()?.remove();
-  const রেঞ্জ = শীট.getRange(1, 1, শীট.getLastRow(), 13);
-  const ফিল্টার = রেঞ্জ.createFilter();
-  ফিল্টার.setColumnFilterCriteria(13, SpreadsheetApp.newFilterCriteria()
-    .setVisibleValues(['✅ ডান']).build());
+function applyStatusStyle(sheet, row, status) {
+  var range = sheet.getRange(row, STATUS_COL);
+  switch (status) {
+    case '⏳ পেন্ডিং':
+      range.setBackground('#fef9e7').setFontColor('#e67e22').setFontWeight('bold');
+      break;
+    case '🔧 প্রসেসিং':
+      range.setBackground('#ebf5fb').setFontColor('#2980b9').setFontWeight('bold');
+      break;
+    case '📦 শিপড':
+      range.setBackground('#f4ecf7').setFontColor('#8e44ad').setFontWeight('bold');
+      break;
+    case '✅ ডেলিভারড':
+      range.setBackground('#d5f5e3').setFontColor('#27ae60').setFontWeight('bold');
+      break;
+    case '❌ বাতিল':
+      range.setBackground('#f2d7d5').setFontColor('#c0392b').setFontWeight('bold');
+      break;
+  }
 }
 
-function ফিল্টার_সব() {
-  const শীট = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(অর্ডার_শীট);
-  if (!শীট) return;
-  শীট.getFilter()?.remove();
+/* ===== Auto-Color on Status Change ===== */
+function onEdit(e) {
+  var range = e.range;
+  var sheet = range.getSheet();
+  if (sheet.getName() !== ORDER_SHEET) return;
+  if (range.getColumn() !== STATUS_COL) return;
+  if (range.getRow() < 2) return;
+  var status = range.getValue();
+  if (STATUS_LIST.indexOf(status) !== -1) {
+    applyStatusStyle(sheet, range.getRow(), status);
+  }
 }
 
-function ফিল্টার_সেটআপ(শীট) {
-  if (শীট.getLastRow() < 2) return;
-  শীট.getFilter()?.remove();
-  const রেঞ্জ = শীট.getRange(1, 1, শীট.getLastRow(), 13);
-  const ফিল্টার = রেঞ্জ.createFilter();
-  ফিল্টার.setColumnFilterCriteria(13, SpreadsheetApp.newFilterCriteria()
-    .setVisibleValues(['⏳ পেন্ডিং']).build());
+/* ===== Setup onEdit Trigger (Run Once) ===== */
+function setupTrigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var hasTrigger = false;
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'onEdit') {
+      hasTrigger = true;
+      break;
+    }
+  }
+  if (!hasTrigger) {
+    ScriptApp.newTrigger('onEdit')
+      .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
+      .onEdit()
+      .create();
+    SpreadsheetApp.getUi().alert('✅ onEdit ট্রিগার সেটআপ হয়েছে!');
+  } else {
+    SpreadsheetApp.getUi().alert('ℹ️ ট্রিগার আগেই সেটআপ করা আছে।');
+  }
 }
 
-/* ===== ডান করুন ===== */
-function ডান_করুন() {
-  const শীট = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(অর্ডার_শীট);
-  if (!শীট) return;
-  const সারি = শীট.getActiveRange()?.getRow();
-  if (!সারি || সারি <= 1) return;
-  শীট.getRange(সারি, 13).setValue('✅ ডান');
-  শীট.getRange(সারি, 13).setBackground('#d5f5e3').setFontColor('#27ae60');
-  রিফ্রেশ_ড্যাশবোর্ড();
+/* ===== WhatsApp One-Click Link ===== */
+function setWhatsAppLink(sheet, row) {
+  if (row <= 1) return;
+  var colB = 'B' + row;
+  var colD = 'D' + row;
+  var colE = 'E' + row;
+  var colF = 'F' + row;
+  var colH = 'H' + row;
+  var colI = 'I' + row;
+  var colK = 'K' + row;
+  var colN = 'N' + row;
+
+  var formula = '=HYPERLINK("https://wa.me/88"&MID(' + colD + ',2,99)&"?text="&ENCODEURL(' +
+    '"প্রিয় "&' + colB + '&CHAR(10)&' +
+    '"মৃন্ময়ী - Mrinmoyee"&CHAR(10)&CHAR(10)&' +
+    '"🛒 অর্ডার ডিটেইলস:"&CHAR(10)&' +
+    colI + '&" x "&' + colK + '&" = ৳"&' + colN + '&CHAR(10)&' +
+    '"🚚 "&' + colF + '&CHAR(10)&' +
+    '"💳 "&' + colH + '&CHAR(10)&' +
+    '"📍 "&' + colE + '&CHAR(10)&CHAR(10)&' +
+    '"আপনাকে ধন্যবাদ! 💛"' +
+    '), "📲 WhatsApp")';
+
+  sheet.getRange(row, WHATSAPP_COL).setFormula(formula);
 }
 
-function রিফ্রেশ_ড্যাশবোর্ড() {
-  ড্যাশবোর্ড_আপডেট(SpreadsheetApp.getActiveSpreadsheet());
+/* ===== Filter by Status ===== */
+function filterPending() { filterByStatus('⏳ পেন্ডিং'); }
+function filterProcessing() { filterByStatus('🔧 প্রসেসিং'); }
+function filterShipped() { filterByStatus('📦 শিপড'); }
+function filterDelivered() { filterByStatus('✅ ডেলিভারড'); }
+
+function filterByStatus(status) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ORDER_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return;
+  if (sheet.getFilter()) sheet.getFilter().remove();
+  var range = sheet.getRange(1, 1, sheet.getLastRow(), HEADERS.length);
+  var filter = range.createFilter();
+  filter.setColumnFilterCriteria(STATUS_COL, SpreadsheetApp.newFilterCriteria()
+    .setVisibleValues([status]).build());
 }
 
-/* ===== শীট সেটআপ ===== */
-function শীট_নিশ্চিত_করুন(ss) {
-  [অর্ডার_শীট, ড্যাশবোর্ড_শীট].forEach(নাম => {
-    if (!ss.getSheetByName(নাম)) ss.insertSheet(নাম);
-  });
+function filterAll() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ORDER_SHEET);
+  if (!sheet) return;
+  if (sheet.getFilter()) sheet.getFilter().remove();
 }
 
-function হেডার_ফরম্যাট(শ) {
-  const রেঞ্জ = শ.getRange(1, 1, 1, 13);
-  রেঞ্জ.setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold')
+/* ===== Sheet Setup ===== */
+function ensureSheets(ss) {
+  var names = [ORDER_SHEET, DASHBOARD_SHEET];
+  for (var i = 0; i < names.length; i++) {
+    if (!ss.getSheetByName(names[i])) ss.insertSheet(names[i]);
+  }
+}
+
+function formatHeader(sheet) {
+  var range = sheet.getRange(1, 1, 1, HEADERS.length);
+  range.setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold')
     .setHorizontalAlignment('center')
     .setBorder(true, true, true, true, true, true, '#a93226', SpreadsheetApp.BorderStyle.SOLID);
-  শ.setFrozenRows(1);
+  sheet.setFrozenRows(1);
 }
 
-function সারি_ফরম্যাট(শ, লাইন) {
-  শ.getRange(লাইন, 1, 1, 13)
+function formatRow(sheet, row) {
+  sheet.getRange(row, 1, 1, HEADERS.length)
     .setBorder(true, true, true, true, null, null, '#ddd5cc', SpreadsheetApp.BorderStyle.SOLID);
-  শ.autoResizeColumns(1, 13);
+  sheet.autoResizeColumns(1, HEADERS.length);
 }
 
-/* ===== ড্যাশবোর্ড ===== */
-function ড্যাশবোর্ড_আপডেট(ss) {
-  const ড্যাশ = ss.getSheetByName(ড্যাশবোর্ড_শীট);
-  const অর্ডার = ss.getSheetByName(অর্ডার_শীট);
-  if (!ড্যাশ || !অর্ডার) return;
-  ড্যাশ.clear();
-  ড্যাশ.getRange(1, 1, ড্যাশ.getMaxRows(), ড্যাশ.getMaxColumns()).breakApart();
-  while (ড্যাশ.getMaxRows() > 35) { ড্যাশ.deleteRow(ড্যাশ.getMaxRows()); }
-  ড্যাশডিজাইন_প্রয়োগ(ড্যাশ, অর্ডার);
+/* ===== Dashboard ===== */
+function refreshDashboard() {
+  updateDashboard(SpreadsheetApp.getActiveSpreadsheet());
 }
 
-function ড্যাশডিজাইন_প্রয়োগ(ড্যাশ, অর্ডারশীট) {
-  const সব = অর্ডারশীট.getDataRange().getValues();
-  const রows = সব.filter((r, i) => i > 0 && r[1]);
-  const n = রows.length;
+function updateDashboard(ss) {
+  var dash = ss.getSheetByName(DASHBOARD_SHEET);
+  var orderSheet = ss.getSheetByName(ORDER_SHEET);
+  if (!dash || !orderSheet) return;
+  dash.clear();
+  dash.getRange(1, 1, dash.getMaxRows(), dash.getMaxColumns()).breakApart();
+  while (dash.getMaxRows() > 35) { dash.deleteRow(dash.getMaxRows()); }
+  buildDashboard(dash, orderSheet);
+}
 
-  ড্যাশ.getRange('A1:F1').merge();
-  ড্যাশ.getRange('A1').setValue('📊 মৃন্ময়ী - অর্ডার ড্যাশবোর্ড')
+function buildDashboard(dash, orderSheet) {
+  var allData = orderSheet.getDataRange().getValues();
+  // Index: 0=সময়, 1=নাম, 2=মোবাইল, 3=হোয়াটসঅ্যাপ, 4=ঠিকানা, 5=ডেলিভারি এরিয়া,
+  // 6=ডেলিভারি চার্জ, 7=পেমেন্ট, 8=প্রোডাক্ট, 9=সাইজ, 10=পরিমাণ, 11=মূল্য,
+  // 12=নোট, 13=নেট টোটাল, 14=স্ট্যাটাস, 15=WhatsApp
+  var rows = [];
+  for (var i = 1; i < allData.length; i++) {
+    if (allData[i][1]) rows.push(allData[i]);
+  }
+  var n = rows.length;
+
+  // Title
+  dash.getRange('A1:F1').merge();
+  dash.getRange('A1').setValue('📊 মৃন্ময়ী - অর্ডার ড্যাশবোর্ড')
     .setFontSize(18).setFontWeight('bold').setFontColor('#c0392b')
     .setHorizontalAlignment('center').setBackground('#fdf8f4');
-  ড্যাশ.setRowHeight(1, 40);
+  dash.setRowHeight(1, 40);
 
-  const আজ = new Date(); আজ.setHours(0,0,0,0);
-  const আজকে = রows.filter(r => new Date(r[0]).setHours(0,0,0,0) === আজ.getTime());
-  const এইমাস = রows.filter(r => new Date(r[0]).getMonth() === আজ.getMonth());
-  const পেন্ডিং = রows.filter(r => r[12] === '⏳ পেন্ডিং');
-  const মোটটাকা = রows.reduce((s, r) => s + (parseInt(r[10])||0), 0);
-  const প্রথমদিন = রows.length > 0 ? new Date(রows[0][0]) : new Date();
-  const দিনdiff = Math.max(1, Math.ceil((new Date() - প্রথমদিন) / (1000*86400)));
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayOrders = 0;
+  var thisMonth = 0;
+  var pending = 0;
+  var totalRevenue = 0;
+  var productCount = {};
 
-  const কার্ড = [
+  for (var r = 0; r < rows.length; r++) {
+    var rowDate = new Date(rows[r][0]);
+    rowDate.setHours(0,0,0,0);
+    if (rowDate.getTime() === today.getTime()) todayOrders++;
+    if (rowDate.getMonth() === today.getMonth()) thisMonth++;
+    if (rows[r][14] === '⏳ পেন্ডিং') pending++;
+    totalRevenue += parseInt(rows[r][13]) || 0;
+    var pName = rows[r][8] || 'অজানা';
+    productCount[pName] = (productCount[pName] || 0) + (parseInt(rows[r][10]) || 1);
+  }
+
+  var firstDay = rows.length > 0 ? new Date(rows[0][0]) : new Date();
+  var daysDiff = Math.max(1, Math.ceil((new Date().getTime() - firstDay.getTime()) / (1000*86400)));
+
+  var cards = [
     ['📦 মোট অর্ডার', n, '#c0392b'],
-    ['💰 নেট আয় (৳)', মোটটাকা.toLocaleString('bn-IN'), '#27ae60'],
-    ['🕐 আজকের', আজকে.length, '#2980b9'],
-    ['📅 এই মাসের', এইমাস.length, '#8e44ad'],
-    ['⏳ পেন্ডিং', পেন্ডিং.length, '#e67e22'],
-    ['📈 গড়/দিন', n > 0 ? (n/দিনdiff).toFixed(1) : '0', '#d4a853']
+    ['💰 নেট আয় (৳)', totalRevenue.toLocaleString('bn-IN'), '#27ae60'],
+    ['🕐 আজকের', todayOrders, '#2980b9'],
+    ['📅 এই মাসের', thisMonth, '#8e44ad'],
+    ['⏳ পেন্ডিং', pending, '#e67e22'],
+    ['📈 গড়/দিন', n > 0 ? (n/daysDiff).toFixed(1) : '0', '#d4a853']
   ];
 
-  কার্ড.forEach((c, i) => {
-    const কল = i < 3 ? 'A' : 'D';
-    const ল = i < 3 ? (i+3) : (i-2);
-    ড্যাশ.getRange(`${কল}${ল}`).setValue(c[0]).setFontSize(10).setFontColor('#7f6b5e');
-    ড্যাশ.getRange(`${কল}${ল}`).offset(0,1).setValue(c[1])
-      .setFontSize(24).setFontWeight('bold').setFontColor(c[2]);
-    ড্যাশ.getRange(`${কল}${ল}:${String.fromCharCode(কল.charCodeAt(0)+1)}${ল}`)
-      .merge().setBackground('#fff')
-      .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
-    ড্যাশ.setRowHeight(ল, 55);
-  });
-
-  // টপ প্রোডাক্ট
-  const টপস্টার্ট = 11;
-  ড্যাশ.getRange(`A${টপস্টার্ট}:F${টপস্টার্ট}`).merge();
-  ড্যাশ.getRange(`A${টপস্টার্ট}`).setValue('🏆 জনপ্রিয় প্রোডাক্ট')
-    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
-
-  const কাউন্ট = {};
-  রows.forEach(r => {
-    const পি = r[4]||'অজানা'; কাউন্ট[পি] = (কাউন্ট[পি]||0)+(parseInt(r[6])||1);
-  });
-  const টপ = Object.entries(কাউন্ট).sort((a,b) => b[1]-a[1]).slice(0,8);
-
-  [['A','#'],['B:C','প্রোডাক্ট'],['D','বিক্রি'],['E:F','আয় (৳)']].forEach(([কল,টেক্সট]) => {
-    ড্যাশ.getRange(`${কল}${টপস্টার্ট+1}`).setValue(টেক্সট)
-      .setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-  });
-
-  টপ.forEach(([নাম, ক], i) => {
-    const ল = টপস্টার্ট+2+i;
-    ড্যাশ.getRange(`A${ল}`).setValue(i+1).setHorizontalAlignment('center');
-    ড্যাশ.getRange(`B${ল}:C${ল}`).merge().setValue(নাম).setFontSize(10);
-    ড্যাশ.getRange(`D${ল}`).setValue(ক).setHorizontalAlignment('center').setFontWeight('bold');
-    ড্যাশ.getRange(`E${ল}:F${ল}`).merge()
-      .setValue(রows.filter(r => r[4]===নাম).reduce((s,r)=>s+(parseInt(r[10])||0),0))
-      .setHorizontalAlignment('right').setFontColor('#27ae60').setFontWeight('bold');
-    ড্যাশ.getRange(`A${ল}:F${ল}`)
-      .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID)
-      .setBackground(i%2===0?'#fdf8f4':'#fff');
-  });
-
-  // ৭ দিনের ট্রেন্ড
-  const শেষ = টপস্টার্ট+2+Math.min(টপ.length,8)+1;
-  ড্যাশ.getRange(`A${শেষ}:F${শেষ}`).merge();
-  ড্যাশ.getRange(`A${শেষ}`).setValue('📆 গত ৭ দিনের অর্ডার')
-    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
-
-  const দিনলিপি = {};
-  for (let i=6; i>=0; i--) {
-    const d = new Date(আজ); d.setDate(d.getDate()-i);
-    দিনলিপি[d.toLocaleDateString('bn-BD',{day:'numeric',month:'short'})] = 0;
+  for (var ci = 0; ci < cards.length; ci++) {
+    var col = ci < 3 ? 'A' : 'D';
+    var crow = ci < 3 ? (ci+3) : (ci-2);
+    dash.getRange(col + crow).setValue(cards[ci][0]).setFontSize(10).setFontColor('#7f6b5e');
+    dash.getRange(col + crow).offset(0,1).setValue(cards[ci][1] + '').setFontSize(24).setFontWeight('bold').setFontColor(cards[ci][2]);
+    dash.getRange(col + crow + ':' + String.fromCharCode(col.charCodeAt(0)+1) + crow).merge().setBackground('#fff')
+      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID);
+    dash.setRowHeight(crow, 55);
   }
-  রows.forEach(r => {
-    const d = new Date(r[0]);
-    const কী = d.toLocaleDateString('bn-BD',{day:'numeric',month:'short'});
-    if (দিনলিপি[কী]!==undefined) দিনলিপি[কী]++;
-  });
 
-  ড্যাশ.getRange(`A${শেষ+1}`).setValue('তারিখ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-  ড্যাশ.getRange(`B${শেষ+1}:E${শেষ+1}`).merge().setValue('গ্রাফ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-  ড্যাশ.getRange(`F${শেষ+1}`).setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  // Top Products
+  var topStart = 11;
+  dash.getRange('A' + topStart + ':F' + topStart).merge();
+  dash.getRange('A' + topStart).setValue('🏆 জনপ্রিয় প্রোডাক্ট')
+    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
 
-  Object.entries(দিনলিপি).forEach(([দিন, ক], i) => {
-    const ল = শেষ+2+i;
-    ড্যাশ.getRange(`A${ল}`).setValue(দিন);
-    ড্যাশ.getRange(`B${ল}:E${ল}`).merge();
-    const বার = '█'.repeat(ক) + '░'.repeat(Math.max(0,10-ক));
-    ড্যাশ.getRange(`B${ল}:E${ল}`).setValue(বার).setFontFamily('Courier New').setFontSize(12)
-      .setFontColor(ক>0?'#27ae60':'#ddd5cc');
-    ড্যাশ.getRange(`F${ল}`).setValue(ক).setHorizontalAlignment('center').setFontWeight('bold');
-    ড্যাশ.getRange(`A${ল}:F${ল}`)
-      .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
-  });
+  var sortedProducts = Object.entries(productCount).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 8);
 
-  ড্যাশ.autoResizeColumns(1,6);
-  ড্যাশ.setColumnWidth(2, 200);
+  var dashHeaders = [['A','#'],['B:C','প্রোডাক্ট'],['D','বিক্রি'],['E:F','আয় (৳)']];
+  for (var hi = 0; hi < dashHeaders.length; hi++) {
+    dash.getRange(dashHeaders[hi][0] + (topStart+1)).setValue(dashHeaders[hi][1])
+      .setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  }
+
+  for (var pi = 0; pi < sortedProducts.length; pi++) {
+    var pr = topStart + 2 + pi;
+    var productName = sortedProducts[pi][0];
+    var productQty = sortedProducts[pi][1];
+    var productRevenue = 0;
+    for (var ri = 0; ri < rows.length; ri++) {
+      if (rows[ri][8] === productName) productRevenue += parseInt(rows[ri][13]) || 0;
+    }
+    dash.getRange('A' + pr).setValue(pi+1).setHorizontalAlignment('center');
+    dash.getRange('B' + pr + ':C' + pr).merge().setValue(productName).setFontSize(10);
+    dash.getRange('D' + pr).setValue(productQty).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('E' + pr + ':F' + pr).merge().setValue(productRevenue)
+      .setHorizontalAlignment('right').setFontColor('#27ae60').setFontWeight('bold');
+    dash.getRange('A' + pr + ':F' + pr)
+      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID)
+      .setBackground(pi%2===0?'#fdf8f4':'#fff');
+  }
+
+  // 7-day trend
+  var trendStart = topStart + 2 + Math.min(sortedProducts.length, 8) + 1;
+  dash.getRange('A' + trendStart + ':F' + trendStart).merge();
+  dash.getRange('A' + trendStart).setValue('📆 গত ৭ দিনের অর্ডার')
+    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
+
+  var dayKeys = [];
+  var dayValues = {};
+  for (var di = 6; di >= 0; di--) {
+    var d = new Date(today);
+    d.setDate(d.getDate() - di);
+    var key = d.toLocaleDateString('bn-BD', {day:'numeric',month:'short'});
+    dayKeys.push(key);
+    dayValues[key] = 0;
+  }
+  for (var ri2 = 0; ri2 < rows.length; ri2++) {
+    var d2 = new Date(rows[ri2][0]);
+    var key2 = d2.toLocaleDateString('bn-BD', {day:'numeric',month:'short'});
+    if (dayValues[key2] !== undefined) dayValues[key2]++;
+  }
+
+  dash.getRange('A' + (trendStart+1)).setValue('তারিখ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  dash.getRange('B' + (trendStart+1) + ':E' + (trendStart+1)).merge().setValue('গ্রাফ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  dash.getRange('F' + (trendStart+1)).setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+
+  for (var tdi = 0; tdi < dayKeys.length; tdi++) {
+    var tr = trendStart + 2 + tdi;
+    var val = dayValues[dayKeys[tdi]];
+    dash.getRange('A' + tr).setValue(dayKeys[tdi]);
+    dash.getRange('B' + tr + ':E' + tr).merge();
+    var bar = '';
+    for (var bi = 0; bi < Math.min(val, 10); bi++) bar += '█';
+    for (var bj = 0; bj < Math.max(0, 10 - val); bj++) bar += '░';
+    dash.getRange('B' + tr + ':E' + tr).setValue(bar).setFontFamily('Courier New').setFontSize(12)
+      .setFontColor(val > 0 ? '#27ae60' : '#ddd5cc');
+    dash.getRange('F' + tr).setValue(val).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('A' + tr + ':F' + tr)
+      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID);
+  }
+
+  dash.autoResizeColumns(1, 6);
+  dash.setColumnWidth(2, 200);
 }
 ```
 
@@ -297,6 +404,31 @@ function ড্যাশডিজাইন_প্রয়োগ(ড্যাশ
    - Who has access: **Anyone**
    - **Deploy**
 5. **ওয়েব অ্যাপের URL** কপি করে `index.html` ফাইলে `YOUR_GOOGLE_APPS_SCRIPT_ID` জায়গায় বসান
+
+> **⚠️ পুরনো ডেটা থাকলে:** এই ভার্সনে কলাম的结构 বদলেছে। আগের শীট থাকলে **নতুন শীট তৈরি** করে সেটআপ করুন, অথবা আগের শীটের ডেটা ব্যাকআপ নিয়ে কলাম এডিট করে নিন।
+
+### স্ট্যাটাস ড্রপডাউন + WhatsApp লিংক সেটআপ
+
+প্রথমবার ডিপ্লয়ের পর **একবার** `setupTrigger()` ফাংশন রান করান:
+1. Apps Script এডিটরে **Execute > Run function > setupTrigger** সিলেক্ট করুন
+2. অনুমতি দিলে automatically `onEdit` ট্রিগার সেট হবে
+3. এর পর থেকে শীটে স্ট্যাটাস পরিবর্তন করলেই অটো কালার হয়ে যাবে
+
+### WhatsApp One-Click Send
+
+শীটের **WhatsApp লিংক** কলামে ক্লিক করলেই WhatsApp ওপেন হবে প্রি-ফরম্যাটেড মেসেজ সহ:
+```
+প্রিয় [নাম],
+মৃন্ময়ী - Mrinmoyee
+
+🛒 অর্ডার ডিটেইলস:
+[প্রোডাক্ট] x [পরিমাণ] = ৳[টোটাল]
+🚚 [ডেলিভারি এরিয়া]
+💳 [পেমেন্ট]
+📍 [ঠিকানা]
+
+আপনাকে ধন্যবাদ! 💛
+```
 
 ---
 

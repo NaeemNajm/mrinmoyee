@@ -52,6 +52,14 @@ const products = [
     }
 ];
 
+// ========== Delivery Areas ==========
+const deliveryAreas = [
+    { value: 'pickup', label: 'উপশহর থেকে পিকআপ', charge: 0, display: 'ফ্রি' },
+    { value: 'bogura_city', label: 'বগুড়া শহর হোম ডেলিভারি', charge: 0, display: '৫০৳ (আপাতত ফ্রি)' },
+    { value: 'inside_dhaka', label: 'ঢাকার ভিতরে', charge: 100, display: '১০০৳' },
+    { value: 'outside_dhaka', label: 'ঢাকার বাইরে/সারা দেশ', charge: 150, display: '১৫০৳' },
+];
+
 // ========== Render Products ==========
 let currentFilter = 'all';
 
@@ -126,11 +134,28 @@ function updatePrice() {
 function calcTotal() {
     const price = parseInt(document.getElementById('priceInput')?.value || 0);
     const qty = parseInt(document.getElementById('quantityInput')?.value || 1);
-    const delivery = parseInt(document.getElementById('deliveryInput')?.value || 0);
+
+    let delivery = 0;
+    const areaSelect = document.getElementById('deliveryArea');
+    const chargeDisplay = document.getElementById('deliveryChargeDisplay');
+    const chargeInput = document.getElementById('deliveryChargeInput');
+    if (areaSelect) {
+        const area = deliveryAreas.find(a => a.value === areaSelect.value);
+        if (area) {
+            delivery = area.charge;
+            if (chargeDisplay) chargeDisplay.textContent = area.display;
+        } else {
+            if (chargeDisplay) chargeDisplay.textContent = 'এরিয়া সিলেক্ট করুন';
+        }
+        if (chargeInput) chargeInput.value = delivery;
+    }
+
     const total = (price * qty) + delivery;
 
-    document.getElementById('totalAmount').textContent = `৳${total}`;
-    document.getElementById('totalInput').value = total;
+    const totalEl = document.getElementById('totalAmount');
+    const totalInput = document.getElementById('totalInput');
+    if (totalEl) totalEl.textContent = `৳${total}`;
+    if (totalInput) totalInput.value = total;
 }
 
 function resetOrder() {
@@ -138,6 +163,8 @@ function resetOrder() {
     document.getElementById('orderForm').style.display = 'block';
     document.getElementById('orderForm').reset();
     document.getElementById('priceDisplay').textContent = 'প্রোডাক্ট সিলেক্ট করুন';
+    const cd = document.getElementById('deliveryChargeDisplay');
+    if (cd) cd.textContent = 'এরিয়া সিলেক্ট করুন';
     document.getElementById('totalAmount').textContent = '৳০';
     document.getElementById('totalInput').value = '0';
     document.getElementById('priceInput').value = '0';
@@ -168,7 +195,6 @@ function populateSelect() {
     });
 
     select.addEventListener('change', updatePrice);
-    document.getElementById('deliveryInput')?.addEventListener('change', calcTotal);
 }
 
 // ========== Hamburger Menu ==========

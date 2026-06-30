@@ -140,11 +140,34 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>ঠিকানা *</label>
-                        <input type="text" name="address" required placeholder="জেলা, থানা, বিস্তারিত ঠিকানা" />
+                        <label>হোয়াটসঅ্যাপ নম্বর *</label>
+                        <input type="tel" name="whatsapp" required placeholder="০১৭XXXXXXXX" />
                     </div>
                     <div class="form-group">
-                        <label>প্রোডাক্ট সিলেক্ট করুন *</label>
+                        <label>পেমেন্ট মেথড *</label>
+                        <select name="payment_method" required>
+                            <option value="COD">ক্যাশ অন ডেলিভারি (COD)</option>
+                            <option value="Prepaid">প্রিপেইড (Prepaid)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ঠিকানা *</label>
+                    <input type="text" name="address" required placeholder="জেলা, থানা, বিস্তারিত ঠিকানা" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ডেলিভারি এরিয়া *</label>
+                        <select name="delivery_area" id="deliveryArea" required onchange="calcTotal()">
+                            <option value="">-- বেছে নিন --</option>
+                            <option value="pickup">উপশহর থেকে পিকআপ — ফ্রি</option>
+                            <option value="bogura_city">বগুড়া শহর হোম ডেলিভারি — ৫০৳ (আপাতত ফ্রি)</option>
+                            <option value="inside_dhaka">ঢাকার ভিতরে — ১০০৳</option>
+                            <option value="outside_dhaka">ঢাকার বাইরে/সারা দেশ — ১৫০৳</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>প্রোডাক্ট *</label>
                         <select name="product" id="productSelect" required>
                             <option value="">-- প্রোডাক্ট বেছে নিন --</option>
                         </select>
@@ -171,8 +194,9 @@
                         <input type="hidden" name="price" id="priceInput" value="0" />
                     </div>
                     <div class="form-group">
-                        <label>ডেলিভারি চার্জ (৳)</label>
-                        <input type="number" name="delivery" id="deliveryInput" value="60" min="0" oninput="calcTotal()" />
+                        <label>ডেলিভারি চার্জ</label>
+                        <div class="price-display" id="deliveryChargeDisplay">এরিয়া সিলেক্ট করুন</div>
+                        <input type="hidden" name="delivery_charge" id="deliveryChargeInput" value="0" />
                     </div>
                 </div>
                 <input type="hidden" name="discount" id="discountInput" value="0" />
@@ -186,7 +210,7 @@
                     <textarea name="note" rows="2" placeholder="কিছু বিশেষ অনুরোধ থাকলে লিখুন"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary btn-submit">অর্ডার কনফার্ম করুন</button>
-                <p class="form-note">অর্ডার পাওয়ার পর আমরা ফোনে কনফার্ম করব। পেমেন্ট ক্যাশ অন ডেলিভারি।</p>
+                <p class="form-note">অর্ডার পাওয়ার পর আমরা ফোনে কনফার্ম করব।</p>
             </form>
             <div class="order-success" id="orderSuccess" style="display:none;">
                 <div class="success-icon">✅</div>
