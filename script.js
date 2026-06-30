@@ -208,6 +208,21 @@ document.querySelectorAll('.nav-links a').forEach(a => {
     });
 });
 
+// ========== Copy Mobile to WhatsApp ==========
+function copyMobileToWhatsApp() {
+    const mobile = document.querySelector('input[name="phone"]');
+    const whatsapp = document.getElementById('whatsappInput');
+    if (mobile && whatsapp && mobile.value) {
+        whatsapp.value = mobile.value;
+        whatsapp.style.borderColor = '#27ae60';
+        whatsapp.style.background = '#f0faf0';
+        setTimeout(() => {
+            whatsapp.style.borderColor = '';
+            whatsapp.style.background = '';
+        }, 3000);
+    }
+}
+
 // ========== Order Form Submit ==========
 document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();

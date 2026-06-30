@@ -447,6 +447,15 @@ ul { list-style: none; }
     border-radius: 16px;
 }
 .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+.whatsapp-helper {
+    display: block;
+    font-size: 0.8rem;
+    color: #27ae60;
+    cursor: pointer;
+    margin-top: 0.3rem;
+    transition: color 0.2s;
+}
+.whatsapp-helper:hover { color: #1e8449; text-decoration: underline; }
 
 /* ========== Contact ========== */
 .contact {
