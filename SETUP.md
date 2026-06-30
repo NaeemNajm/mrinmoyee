@@ -194,7 +194,7 @@ function setWhatsAppLink(sheet, row) {
   var colK = 'K' + row;
   var colN = 'N' + row;
 
-  var formula = '=HYPERLINK("https://wa.me/880"&MID(' + colD + ',2,99)&"?text="&ENCODEURL(' +
+  var formula = '=HYPERLINK("https://wa.me/880"&IF(LEFT(' + colD + ',1)="0",MID(' + colD + ',2,99),' + colD + ')&"?text="&ENCODEURL(' +
     '"প্রিয় "&' + colB + '&CHAR(10)&' +
     '"মৃন্ময়ী - Mrinmoyee"&CHAR(10)&CHAR(10)&' +
     '"ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?"&CHAR(10)&CHAR(10)&' +
