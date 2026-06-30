@@ -54,10 +54,10 @@ const products = [
 
 // ========== Delivery Areas ==========
 const deliveryAreas = [
-    { value: 'pickup', label: 'উপশহর থেকে পিকআপ', charge: 0, display: 'ফ্রি' },
-    { value: 'bogura_city', label: 'বগুড়া শহর হোম ডেলিভারি', charge: 0, display: '৫০৳ (আপাতত ফ্রি)' },
-    { value: 'inside_dhaka', label: 'ঢাকার ভিতরে', charge: 100, display: '১০০৳' },
-    { value: 'outside_dhaka', label: 'ঢাকার বাইরে/সারা দেশ', charge: 150, display: '১৫০৳' },
+    { value: 'উপশহর থেকে পিকআপ', charge: 0, display: 'ফ্রি' },
+    { value: 'বগুড়া শহর হোম ডেলিভারি', charge: 0, display: '৫০৳ (আপাতত ফ্রি)' },
+    { value: 'ঢাকার ভিতরে', charge: 100, display: '১০০৳' },
+    { value: 'ঢাকার বাইরে/সারা দেশ', charge: 150, display: '১৫০৳' },
 ];
 
 // ========== Render Products ==========

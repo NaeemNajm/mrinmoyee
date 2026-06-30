@@ -135,20 +135,20 @@
                     </div>
                     <div class="form-group">
                         <label>মোবাইল নম্বর *</label>
-                        <input type="tel" name="phone" required placeholder="০১৭XXXXXXXX" />
+                        <input type="tel" name="phone" required placeholder="০১৩XXXXXXXX" pattern="01[0-9]{9}" title="০১ দিয়ে শুরু ১১ ডিজিটের নম্বর দিন" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>হোয়াটসঅ্যাপ নম্বর *</label>
-                        <input type="tel" name="whatsapp" id="whatsappInput" required placeholder="০১৭XXXXXXXX" />
+                        <input type="tel" name="whatsapp" id="whatsappInput" required placeholder="০১৩XXXXXXXX" pattern="01[0-9]{9}" title="০১ দিয়ে শুরু ১১ ডিজিটের নম্বর দিন" />
                         <small class="whatsapp-helper" onclick="copyMobileToWhatsApp()">📋 মোবাইল নম্বর একই হলে এখানে ক্লিক করুন</small>
                     </div>
                     <div class="form-group">
                         <label>পেমেন্ট মেথড *</label>
                         <select name="payment_method" required>
-                            <option value="COD">ক্যাশ অন ডেলিভারি (COD)</option>
-                            <option value="Prepaid">প্রিপেইড (Prepaid)</option>
+                            <option value="ক্যাশ অন ডেলিভারি (COD)">ক্যাশ অন ডেলিভারি (COD)</option>
+                            <option value="প্রিপেইড (Prepaid)">প্রিপেইড (Prepaid)</option>
                         </select>
                     </div>
                 </div>
@@ -161,10 +161,10 @@
                         <label>ডেলিভারি এরিয়া *</label>
                         <select name="delivery_area" id="deliveryArea" required onchange="calcTotal()">
                             <option value="">-- বেছে নিন --</option>
-                            <option value="pickup">উপশহর থেকে পিকআপ — ফ্রি</option>
-                            <option value="bogura_city">বগুড়া শহর হোম ডেলিভারি — ৫০৳ (আপাতত ফ্রি)</option>
-                            <option value="inside_dhaka">ঢাকার ভিতরে — ১০০৳</option>
-                            <option value="outside_dhaka">ঢাকার বাইরে/সারা দেশ — ১৫০৳</option>
+                            <option value="উপশহর থেকে পিকআপ">উপশহর থেকে পিকআপ — ফ্রি</option>
+                            <option value="বগুড়া শহর হোম ডেলিভারি">বগুড়া শহর হোম ডেলিভারি — ৫০৳ (আপাতত ফ্রি)</option>
+                            <option value="ঢাকার ভিতরে">ঢাকার ভিতরে — ১০০৳</option>
+                            <option value="ঢাকার বাইরে/সারা দেশ">ঢাকার বাইরে/সারা দেশ — ১৫০৳</option>
                         </select>
                     </div>
                     <div class="form-group">
