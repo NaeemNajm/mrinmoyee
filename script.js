@@ -271,6 +271,14 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     }, 2000);
 });
 
+// ========== Click Tracking Number (from success page) ==========
+function clickTrackNumber() {
+    var orderId = document.getElementById('orderTrackingNumber').textContent;
+    document.getElementById('trackOrderInput').value = orderId;
+    document.getElementById('track-order').scrollIntoView({ behavior: 'smooth' });
+    trackOrder();
+}
+
 // ========== Track Order (JSONP — no CORS) ==========
 function trackOrder() {
     var input = document.getElementById('trackOrderInput');
