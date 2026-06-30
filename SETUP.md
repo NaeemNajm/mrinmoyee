@@ -36,21 +36,23 @@
 3. নিচের কোড কপি-পেস্ট করুন এবং **Save** করুন:
 
 ```javascript
-function doGet(e) {
+function doGet(e) { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+
+function handleRequest(e) {
+  const params = e ? e.parameter : {};
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getActiveSheet();
-
   const row = [
     new Date(),
-    e.parameter.name || '',
-    e.parameter.phone || '',
-    e.parameter.address || '',
-    e.parameter.product || '',
-    e.parameter.size || '',
-    e.parameter.quantity || '1',
-    e.parameter.note || ''
+    params.name || '',
+    params.phone || '',
+    params.address || '',
+    params.product || '',
+    params.size || '',
+    params.quantity || '1',
+    params.note || ''
   ];
-
   sheet.appendRow(row);
   return ContentService
     .createTextOutput(JSON.stringify({ success: true }))
