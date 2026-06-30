@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>মৃন্ময়ী - Mrinmoyee | হাতের চুড়ির সৌন্দর্য</title>
+    <meta name="description" content="মৃন্ময়ী - প্রেমের ছোঁয়ায় বোনা হাতের চুড়ি। কুন্দন ডিজাইনের হাতের চুড়ি সেট কিনুন ৩০০-১০০০ টাকায়।" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID_here');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID_here&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Facebook Pixel Code -->
+</head>
+<body>
+
+    <!-- Messenger Chat Plugin -->
+    <div id="fb-root"></div>
+    <script>
+    window.fbAsyncInit = function() {
+        FB.init({ xfbml: true, version: 'v18.0' });
+    };
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = 'https://connect.facebook.net/bn_BD/sdk/xfbml.customerchat.js';
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <div class="fb-customerchat" attribution="page_inbox" page_id="YOUR_PAGE_ID"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-inner">
+            <a href="#" class="logo">মৃন্ময়ী</a>
+            <button class="hamburger" id="hamburger" aria-label="মেনু">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#products">প্রোডাক্ট</a></li>
+                <li><a href="#about">আমাদের কথা</a></li>
+                <li><a href="#order-form">অর্ডার করুন</a></li>
+                <li><a href="#contact">যোগাযোগ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="hero-text">
+                <p class="hero-tagline">প্রেমের ছোঁয়ায় বোনা</p>
+                <h1>হাতের চুড়ির <br/><span class="hero-highlight">অপূর্ব সৌন্দর্য</span></h1>
+                <p class="hero-desc">কুন্দন ডিজাইনের হাতের চুড়ি সেট। সুতা ও কুন্দনের নিপুণ কারুকাজ — প্রতিটি জোড়া অনন্য।</p>
+                <div class="hero-badges">
+                    <span>হাতের তৈরি</span>
+                    <span>কুন্দন ডিজাইন</span>
+                    <span>সাইজ অনুযায়ী</span>
+                </div>
+                <a href="#products" class="btn btn-primary">প্রোডাক্ট দেখুন</a>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-circle"></div>
+                <div class="hero-bangle b1"></div>
+                <div class="hero-bangle b2"></div>
+                <div class="hero-bangle b3"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2 class="section-title">আমাদের <span>প্রোডাক্ট</span></h2>
+            <p class="section-sub">৩০০ - ১০০০ টাকার মধ্যে হাতের চুড়ি সেট</p>
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">সবগুলো</button>
+                <button class="filter-btn" data-filter="golden">সোনালী</button>
+                <button class="filter-btn" data-filter="red">লাল</button>
+                <button class="filter-btn" data-filter="blue">নীল</button>
+                <button class="filter-btn" data-filter="green">সবুজ</button>
+                <button class="filter-btn" data-filter="premium">প্রিমিয়াম</button>
+            </div>
+            <div class="product-grid" id="productGrid"></div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="about" id="about">
+        <div class="container about-grid">
+            <div class="about-visual">
+                <div class="about-icon">🧵</div>
+                <div class="about-icon">✨</div>
+                <div class="about-icon">💛</div>
+            </div>
+            <div class="about-text">
+                <h2>আমাদের <span>গল্প</span></h2>
+                <p>"মৃন্ময়ী" নামটির অর্থ — মাটির তৈরি সুন্দর প্রতিমা। আমাদের প্রতিটি চুড়ি সেট যেন এক একটি শিল্পকর্ম, যা তৈরি হয় ভালোবাসা আর নৈপুণ্যে।</p>
+                <p>প্লাস্টিকের বেসের উপর রঙিন সুতা পেঁচিয়ে, তার উপর কুন্দনের কারুকাজ — প্রতিটি সেট ঘণ্টার পরিশ্রমের ফসল। আমরা বিশ্বাস করি, <strong>সৌন্দর্য জিনিসপত্রে নয়, সেটি তৈরি করার ভালোবাসায়</strong>।</p>
+                <div class="about-stats">
+                    <div><strong>৫০০+</strong><span>গ্রাহক</span></div>
+                    <div><strong>১০০০+</strong><span>সেট বিক্রিত</span></div>
+                    <div><strong>১০০%</strong><span>হাতের তৈরি</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Form -->
+    <section class="order-section" id="order-form">
+        <div class="container">
+            <h2 class="section-title">অর্ডার <span>করুন</span></h2>
+            <p class="section-sub">নিচের ফর্ম পূরণ করলে আমরা ২৪ ঘণ্টার মধ্যে যোগাযোগ করব</p>
+            <form class="order-form" id="orderForm" action="https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_ID/exec" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>আপনার নাম *</label>
+                        <input type="text" name="name" required placeholder="আপনার নাম" />
+                    </div>
+                    <div class="form-group">
+                        <label>মোবাইল নম্বর *</label>
+                        <input type="tel" name="phone" required placeholder="০১৭XXXXXXXX" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ঠিকানা *</label>
+                        <input type="text" name="address" required placeholder="জেলা, থানা, বিস্তারিত ঠিকানা" />
+                    </div>
+                    <div class="form-group">
+                        <label>প্রোডাক্ট সিলেক্ট করুন *</label>
+                        <select name="product" id="productSelect" required>
+                            <option value="">-- প্রোডাক্ট বেছে নিন --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label>সাইজ</label>
+                        <select name="size">
+                            <option value="মিডিয়াম (২.৪ ইঞ্চি)">মিডিয়াম (২.৪")</option>
+                            <option value="লার্জ (২.৬ ইঞ্চি)">লার্জ (২.৬")</option>
+                            <option value="এক্সট্রা লার্জ (২.৮ ইঞ্চি)">XL (২.৮")</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-group-half">
+                        <label>পরিমাণ</label>
+                        <input type="number" name="quantity" value="1" min="1" max="20" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>বিশেষ নোট (ঐচ্ছিক)</label>
+                    <textarea name="note" rows="2" placeholder="কিছু বিশেষ অনুরোধ থাকলে লিখুন"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-submit">অর্ডার কনফার্ম করুন</button>
+                <p class="form-note">অর্ডার পাওয়ার পর আমরা ফোনে কনফার্ম করব। পেমেন্ট ক্যাশ অন ডেলিভারি।</p>
+            </form>
+            <div class="order-success" id="orderSuccess" style="display:none;">
+                <div class="success-icon">✅</div>
+                <h3>অর্ডার সফল হয়েছে!</h3>
+                <p>আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2 class="section-title">যোগাযোগ</h2>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <div class="contact-icon">📞</div>
+                    <h4>ফোন</h4>
+                    <a href="tel:+8801XXXXXXXXX">০১XXX-XXXXXX</a>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">💬</div>
+                    <h4>মেসেঞ্জার</h4>
+                    <a href="https://m.me/MrinmoyeeChuri" target="_blank">m.me/MrinmoyeeChuri</a>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">📱</div>
+                    <h4>হোয়াটসঅ্যাপ</h4>
+                    <a href="https://wa.me/8801XXXXXXXXX" target="_blank">WhatsApp</a>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">📍</div>
+                    <h4>ফেসবুক পেজ</h4>
+                    <a href="https://facebook.com/MrinmoyeeChuri" target="_blank">/MrinmoyeeChuri</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <h3>মৃন্ময়ী</h3>
+                <p>প্রেমের ছোঁয়ায় বোনা হাতের চুড়ি</p>
+            </div>
+            <div class="footer-links">
+                <a href="#home">হোম</a>
+                <a href="#products">প্রোডাক্ট</a>
+                <a href="#about">আমাদের কথা</a>
+                <a href="#contact">যোগাযোগ</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 মৃন্ময়ী - Mrinmoyee. সর্বস্বত্ব সংরক্ষিত।</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
