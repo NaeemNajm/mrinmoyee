@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <!-- Facebook Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -24,16 +23,12 @@
     <noscript><img height="1" width="1" style="display:none"
     src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID_here&ev=PageView&noscript=1"
     /></noscript>
-    <!-- End Facebook Pixel Code -->
 </head>
 <body>
 
-    <!-- Messenger Chat Plugin -->
     <div id="fb-root"></div>
     <script>
-    window.fbAsyncInit = function() {
-        FB.init({ xfbml: true, version: 'v18.0' });
-    };
+    window.fbAsyncInit = function() { FB.init({ xfbml: true, version: 'v18.0' }); };
     (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
@@ -45,9 +40,24 @@
     <div class="fb-customerchat" attribution="page_inbox" page_id="YOUR_PAGE_ID"></div>
 
     <!-- Navbar -->
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="container nav-inner">
-            <a href="#" class="logo">মৃন্ময়ী</a>
+            <a href="#" class="logo">
+                <span class="logo-icon">
+                    <svg viewBox="0 0 60 60" width="44" height="44">
+                        <circle cx="30" cy="30" r="26" fill="none" stroke="#c0392b" stroke-width="3" opacity="0.6"/>
+                        <circle cx="30" cy="30" r="20" fill="none" stroke="#d4a853" stroke-width="2.5" opacity="0.8"/>
+                        <circle cx="30" cy="30" r="14" fill="none" stroke="#c0392b" stroke-width="2"/>
+                        <circle cx="30" cy="30" r="8" fill="#d4a853" opacity="0.3"/>
+                        <circle cx="30" cy="30" r="3" fill="#c0392b"/>
+                        <circle cx="30" cy="3" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+                        <circle cx="30" cy="57" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+                        <circle cx="3" cy="30" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+                        <circle cx="57" cy="30" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+                    </svg>
+                </span>
+                <span class="logo-text">মৃন্ময়ী</span>
+            </a>
             <button class="hamburger" id="hamburger" aria-label="মেনু">
                 <span></span><span></span><span></span>
             </button>
@@ -63,7 +73,7 @@
 
     <!-- Hero -->
     <section class="hero" id="home">
-        <div class="hero-overlay"></div>
+        <div class="hero-particles"></div>
         <div class="container hero-content">
             <div class="hero-text">
                 <p class="hero-tagline">প্রেমের ছোঁয়ায় বোনা</p>
@@ -77,11 +87,59 @@
                 <a href="#products" class="btn btn-primary">প্রোডাক্ট দেখুন</a>
             </div>
             <div class="hero-visual">
-                <div class="hero-circle"></div>
-                <div class="hero-bangle b1"></div>
-                <div class="hero-bangle b2"></div>
-                <div class="hero-bangle b3"></div>
+                <div class="bangle-3d-scene" id="bangleScene">
+                    <div class="bangle-3d bangle-3d-outer">
+                        <svg viewBox="0 0 200 200" class="bangle-svg">
+                            <defs>
+                                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f1c40f"/>
+                                    <stop offset="50%" stop-color="#d4a853"/>
+                                    <stop offset="100%" stop-color="#f1c40f"/>
+                                </linearGradient>
+                                <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#e74c3c"/>
+                                    <stop offset="50%" stop-color="#c0392b"/>
+                                    <stop offset="100%" stop-color="#e74c3c"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="100" cy="100" r="88" fill="none" stroke="url(#goldGrad)" stroke-width="10" opacity="0.6"/>
+                            <circle cx="100" cy="100" r="76" fill="none" stroke="url(#rubyGrad)" stroke-width="8" opacity="0.5"/>
+                            <circle cx="100" cy="100" r="64" fill="none" stroke="#d4a853" stroke-width="6" opacity="0.7"/>
+                            <circle cx="100" cy="100" r="52" fill="none" stroke="#c0392b" stroke-width="5" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div class="bangle-3d bangle-3d-mid">
+                        <svg viewBox="0 0 200 200" class="bangle-svg">
+                            <defs>
+                                <linearGradient id="emGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#2ecc71"/>
+                                    <stop offset="50%" stop-color="#27ae60"/>
+                                    <stop offset="100%" stop-color="#2ecc71"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="100" cy="100" r="82" fill="none" stroke="url(#emGrad)" stroke-width="9" opacity="0.5"/>
+                            <circle cx="100" cy="100" r="70" fill="none" stroke="#f1c40f" stroke-width="7" opacity="0.6"/>
+                            <circle cx="100" cy="100" r="58" fill="none" stroke="url(#rubyGrad)" stroke-width="5" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div class="bangle-3d bangle-3d-inner">
+                        <svg viewBox="0 0 200 200" class="bangle-svg">
+                            <circle cx="100" cy="100" r="78" fill="none" stroke="#d4a853" stroke-width="10" opacity="0.7"/>
+                            <circle cx="100" cy="100" r="66" fill="none" stroke="#c0392b" stroke-width="8" opacity="0.5"/>
+                            <circle cx="100" cy="100" r="54" fill="none" stroke="#f1c40f" stroke-width="6" opacity="0.6"/>
+                            <circle cx="100" cy="100" r="42" fill="none" stroke="#8e44ad" stroke-width="5" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div class="bangle-sparkle s1"></div>
+                    <div class="bangle-sparkle s2"></div>
+                    <div class="bangle-sparkle s3"></div>
+                    <div class="bangle-sparkle s4"></div>
+                </div>
             </div>
+        </div>
+        <div class="hero-scroll-indicator">
+            <span>স্ক্রোল করুন</span>
+            <div class="scroll-arrow"></div>
         </div>
     </section>
 
@@ -106,9 +164,27 @@
     <section class="about" id="about">
         <div class="container about-grid">
             <div class="about-visual">
-                <div class="about-icon">🧵</div>
-                <div class="about-icon">✨</div>
-                <div class="about-icon">💛</div>
+                <div class="about-bangle-display">
+                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="#c0392b" stroke-width="5" opacity="0.6"/>
+                        <circle cx="60" cy="60" r="40" fill="none" stroke="#d4a853" stroke-width="4" opacity="0.8"/>
+                        <circle cx="60" cy="60" r="30" fill="none" stroke="#c0392b" stroke-width="3"/>
+                    </svg>
+                </div>
+                <div class="about-bangle-display">
+                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
+                        <circle cx="60" cy="60" r="48" fill="none" stroke="#27ae60" stroke-width="5" opacity="0.5"/>
+                        <circle cx="60" cy="60" r="38" fill="none" stroke="#f1c40f" stroke-width="4" opacity="0.7"/>
+                        <circle cx="60" cy="60" r="28" fill="none" stroke="#8e44ad" stroke-width="3" opacity="0.5"/>
+                    </svg>
+                </div>
+                <div class="about-bangle-display">
+                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
+                        <circle cx="60" cy="60" r="46" fill="none" stroke="#2980b9" stroke-width="5" opacity="0.5"/>
+                        <circle cx="60" cy="60" r="36" fill="none" stroke="#c0392b" stroke-width="4" opacity="0.6"/>
+                        <circle cx="60" cy="60" r="26" fill="none" stroke="#f1c40f" stroke-width="3" opacity="0.8"/>
+                    </svg>
+                </div>
             </div>
             <div class="about-text">
                 <h2>আমাদের <span>গল্প</span></h2>
@@ -143,7 +219,7 @@
                     <div class="form-group">
                         <label>হোয়াটসঅ্যাপ নম্বর *</label>
                         <input type="tel" name="whatsapp" id="whatsappInput" required placeholder="০১৩XXXXXXXX" pattern="01[0-9]{9}" title="০১ দিয়ে শুরু ১১ ডিজিটের নম্বর দিন" />
-                        <small class="whatsapp-helper" onclick="copyMobileToWhatsApp()">📋 মোবাইল নম্বর একই হলে এখানে ক্লিক করুন</small>
+                        <small class="whatsapp-helper" onclick="copyMobileToWhatsApp()">মোবাইল নম্বর একই হলে এখানে ক্লিক করুন</small>
                     </div>
                     <div class="form-group">
                         <label>পেমেন্ট মেথড *</label>
@@ -220,7 +296,7 @@
                 <h3>অর্ডার সফল হয়েছে!</h3>
                 <p>আপনার ট্র্যাকিং নং: <strong id="orderTrackingNumber" style="font-size:1.3rem;color:#c0392b;cursor:pointer;text-decoration:underline;" onclick="clickTrackNumber()"></strong> <span style="font-size:0.85rem;color:#999;">(স্ট্যাটাস দেখতে ক্লিক করুন)</span></p>
                 <p>আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
-                <button class="btn btn-outline" onclick="resetOrder()" style="margin-top:1rem;">🛒 আরেকটি অর্ডার করুন</button>
+                <button class="btn btn-outline" onclick="resetOrder()" style="margin-top:1rem;">আরেকটি অর্ডার করুন</button>
             </div>
         </div>
     </section>
@@ -244,22 +320,30 @@
             <h2 class="section-title">যোগাযোগ</h2>
             <div class="contact-grid">
                 <div class="contact-card">
-                    <div class="contact-icon">📞</div>
+                    <div class="contact-card-bangle">
+                        <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="#c0392b" stroke-width="3" opacity="0.5"/><circle cx="25" cy="25" r="14" fill="none" stroke="#d4a853" stroke-width="2"/></svg>
+                    </div>
                     <h4>ফোন</h4>
-                    <a href="tel:+8801XXXXXXXXX">০১XXX-XXXXXX</a>
+                    <a href="tel:+8801779911693">+8801779911693</a>
                 </div>
                 <div class="contact-card">
-                    <div class="contact-icon">💬</div>
+                    <div class="contact-card-bangle">
+                        <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="#27ae60" stroke-width="3" opacity="0.5"/><circle cx="25" cy="25" r="14" fill="none" stroke="#f1c40f" stroke-width="2"/></svg>
+                    </div>
                     <h4>মেসেঞ্জার</h4>
                     <a href="https://m.me/MrinmoyeeChuri" target="_blank">m.me/MrinmoyeeChuri</a>
                 </div>
                 <div class="contact-card">
-                    <div class="contact-icon">📱</div>
+                    <div class="contact-card-bangle">
+                        <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="#2980b9" stroke-width="3" opacity="0.5"/><circle cx="25" cy="25" r="14" fill="none" stroke="#d4a853" stroke-width="2"/></svg>
+                    </div>
                     <h4>হোয়াটসঅ্যাপ</h4>
-                    <a href="https://wa.me/8801XXXXXXXXX" target="_blank">WhatsApp</a>
+                    <a href="https://wa.me/8801779911693" target="_blank">+8801779911693</a>
                 </div>
                 <div class="contact-card">
-                    <div class="contact-icon">📍</div>
+                    <div class="contact-card-bangle">
+                        <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="#8e44ad" stroke-width="3" opacity="0.5"/><circle cx="25" cy="25" r="14" fill="none" stroke="#f1c40f" stroke-width="2"/></svg>
+                    </div>
                     <h4>ফেসবুক পেজ</h4>
                     <a href="https://facebook.com/MrinmoyeeChuri" target="_blank">/MrinmoyeeChuri</a>
                 </div>
@@ -269,18 +353,27 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container footer-inner">
-            <div class="footer-brand">
-                <h3>মৃন্ময়ী</h3>
-                <p>প্রেমের ছোঁয়ায় বোনা হাতের চুড়ি</p>
+        <div class="container">
+            <div class="footer-bangles">
+                <svg viewBox="0 0 80 20" class="footer-bangle-strip"><circle cx="10" cy="10" r="8" fill="none" stroke="#c0392b" stroke-width="2" opacity="0.5"/><circle cx="30" cy="10" r="8" fill="none" stroke="#d4a853" stroke-width="2" opacity="0.5"/><circle cx="50" cy="10" r="8" fill="none" stroke="#27ae60" stroke-width="2" opacity="0.5"/><circle cx="70" cy="10" r="8" fill="none" stroke="#8e44ad" stroke-width="2" opacity="0.5"/></svg>
             </div>
-            <div class="footer-links">
-                <a href="#home">হোম</a>
-                <a href="#products">প্রোডাক্ট</a>
-                <a href="#about">আমাদের কথা</a>
-                <a href="#contact">যোগাযোগ</a>
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <h3>মৃন্ময়ী</h3>
+                    <p>প্রেমের ছোঁয়ায় বোনা হাতের চুড়ি</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">হোম</a>
+                    <a href="#products">প্রোডাক্ট</a>
+                    <a href="#about">আমাদের কথা</a>
+                    <a href="#contact">যোগাযোগ</a>
+                </div>
+                <div class="footer-contact">
+                    <a href="tel:+8801779911693">+8801779911693</a>
+                    <a href="https://wa.me/8801779911693" target="_blank">WhatsApp</a>
+                </div>
+                <p class="footer-copy">&copy; 2026 মৃন্ময়ী - Mrinmoyee. সর্বস্বত্ব সংরক্ষিত।</p>
             </div>
-            <p class="footer-copy">&copy; 2026 মৃন্ময়ী - Mrinmoyee. সর্বস্বত্ব সংরক্ষিত।</p>
         </div>
     </footer>
 

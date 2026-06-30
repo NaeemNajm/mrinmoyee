@@ -1,3 +1,31 @@
+// ========== SVG Bangle Generator ==========
+function generateBangleSVG(color, size) {
+    const c = color || '#c0392b';
+    const cx = 80, cy = 80, r = 60;
+    const lighter = c + '80';
+    const gold = '#d4a853';
+    return `<svg viewBox="0 0 160 160" class="bangle-card-svg">
+        <defs>
+            <linearGradient id="bg${Math.random().toString(36).slice(2,6)}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${c}"/>
+                <stop offset="50%" stop-color="${gold}"/>
+                <stop offset="100%" stop-color="${c}"/>
+            </linearGradient>
+        </defs>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${lighter}" stroke-width="8" opacity="0.4"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 8}" fill="none" stroke="${gold}" stroke-width="5" opacity="0.6"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 16}" fill="none" stroke="${c}" stroke-width="7" opacity="0.7"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 24}" fill="none" stroke="${gold}" stroke-width="4" opacity="0.5"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 32}" fill="none" stroke="${c}" stroke-width="6" opacity="0.6"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 40}" fill="none" stroke="${gold}" stroke-width="3" opacity="0.4"/>
+        <circle cx="${cx}" cy="${cy}" r="8" fill="${gold}" opacity="0.3"/>
+        <circle cx="20" cy="${cy}" r="3" fill="${gold}" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="140" cy="${cy}" r="3" fill="${gold}" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="${cx}" cy="20" r="3" fill="${gold}" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="${cx}" cy="140" r="3" fill="${gold}" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/></circle>
+    </svg>`;
+}
+
 // ========== Product Data ==========
 const products = [
     {
@@ -74,7 +102,7 @@ function renderProducts() {
     grid.innerHTML = filtered.map(p => `
         <div class="product-card" data-id="${p.id}">
             <div class="product-img">
-                <div class="color-dot" style="background: ${p.color};"></div>
+                ${generateBangleSVG(p.color, 60)}
                 ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
             </div>
             <div class="product-info">
@@ -121,7 +149,7 @@ function updatePrice() {
     if (match) {
         const price = parseInt(match[1]);
         display.textContent = `৳${price}`;
-        display.style.color = '#c0392b';
+        display.style.color = '#d4a853';
         input.value = price;
     } else {
         display.textContent = 'প্রোডাক্ট সিলেক্ট করুন';
@@ -215,7 +243,7 @@ function copyMobileToWhatsApp() {
     if (mobile && whatsapp && mobile.value) {
         whatsapp.value = mobile.value;
         whatsapp.style.borderColor = '#27ae60';
-        whatsapp.style.background = '#f0faf0';
+        whatsapp.style.background = 'rgba(39, 174, 96, 0.1)';
         setTimeout(() => {
             whatsapp.style.borderColor = '';
             whatsapp.style.background = '';
@@ -233,7 +261,7 @@ function generateOrderId() {
     return 'MRN-' + y + m + d + '-' + rand;
 }
 
-// ========== Order Form Submit (CORS-safe: hidden iframe) ==========
+// ========== Order Form Submit ==========
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -271,7 +299,7 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     }, 2000);
 });
 
-// ========== Click Tracking Number (from success page) ==========
+// ========== Click Tracking Number ==========
 function clickTrackNumber() {
     var orderId = document.getElementById('orderTrackingNumber').textContent;
     document.getElementById('trackOrderInput').value = orderId;
@@ -279,7 +307,7 @@ function clickTrackNumber() {
     trackOrder();
 }
 
-// ========== Track Order (JSONP — no CORS) ==========
+// ========== Track Order ==========
 function trackOrder() {
     var input = document.getElementById('trackOrderInput');
     var result = document.getElementById('trackResult');
@@ -346,6 +374,18 @@ function showTrackResult(data) {
             '</div>' +
         '</div>';
 }
+
+// ========== Parallax Bangle Scene (mouse) ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const scene = document.getElementById('bangleScene');
+    if (scene) {
+        document.addEventListener('mousemove', function(e) {
+            const x = (e.clientX / window.innerWidth - 0.5) * 15;
+            const y = (e.clientY / window.innerHeight - 0.5) * -15;
+            scene.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+    }
+});
 
 // ========== Init ==========
 renderProducts();
