@@ -271,6 +271,74 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     }, 2000);
 });
 
+// ========== Track Order (JSONP — no CORS) ==========
+function trackOrder() {
+    var input = document.getElementById('trackOrderInput');
+    var result = document.getElementById('trackResult');
+    var orderId = input.value.trim();
+
+    if (!orderId) {
+        result.style.display = 'block';
+        result.innerHTML = '<div class="track-error">অর্ডার আইডি লিখুন</div>';
+        return;
+    }
+
+    result.style.display = 'block';
+    result.innerHTML = '<div class="track-loading">⏳ খোঁজা হচ্ছে...</div>';
+
+    var scriptUrl = document.getElementById('orderForm').action;
+    var cb = 'trackCB_' + Date.now();
+
+    window[cb] = function(data) {
+        delete window[cb];
+        var s = document.getElementById('trackScript');
+        if (s) s.remove();
+        showTrackResult(data);
+    };
+
+    var s = document.createElement('script');
+    s.id = 'trackScript';
+    s.src = scriptUrl + '?action=track&order_id=' + encodeURIComponent(orderId) + '&callback=' + cb;
+    s.onerror = function() {
+        delete window[cb];
+        result.innerHTML = '<div class="track-error">সার্ভারে সমস্যা। পরে আবার চেষ্টা করুন।</div>';
+    };
+    document.body.appendChild(s);
+}
+
+function showTrackResult(data) {
+    var result = document.getElementById('trackResult');
+
+    if (!data.found) {
+        result.innerHTML = '<div class="track-error">❌ ' + data.message + '</div>';
+        return;
+    }
+
+    var d = new Date(data.date);
+    var dateStr = d.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    result.innerHTML =
+        '<div class="track-card" style="border-color:' + data.status_color + '">' +
+            '<div class="track-header" style="background:' + data.status_color + '">' +
+                '<span class="track-status-icon">' + data.status_emoji + '</span>' +
+                '<span class="track-status-title">' + data.status_title + '</span>' +
+            '</div>' +
+            '<div class="track-body">' +
+                '<div class="track-message">' + data.status_message + '</div>' +
+                '<div class="track-details">' +
+                    '<div class="track-detail-row"><span class="track-label">📋 অর্ডার নং</span><span class="track-value">' + data.order_id + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">👤 গ্রাহক</span><span class="track-value">' + data.name + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">📅 তারিখ</span><span class="track-value">' + dateStr + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">🛒 পণ্য</span><span class="track-value">' + data.product + ' — ' + data.size + ' (x' + data.quantity + ')</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">💰 মোট</span><span class="track-value">৳' + data.total + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">💳 পেমেন্ট</span><span class="track-value">' + data.payment + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">🚚 ডেলিভারি</span><span class="track-value">' + data.delivery_area + '</span></div>' +
+                    '<div class="track-detail-row"><span class="track-label">📍 ঠিকানা</span><span class="track-value">' + data.address + '</span></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+
 // ========== Init ==========
 renderProducts();
 populateSelect();

@@ -63,7 +63,12 @@ function onOpen() {
 }
 
 /* ===== Web App Handler ===== */
-function doGet(e) { return handleRequest(e); }
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'track') {
+    return handleTrackRequest(e);
+  }
+  return handleRequest(e);
+}
 function doPost(e) { return handleRequest(e); }
 
 function handleRequest(e) {
@@ -113,6 +118,71 @@ function handleRequest(e) {
 
   return ContentService
     .createTextOutput(JSON.stringify({ success: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ===== Track Order (JSONP-ready) ===== */
+function handleTrackRequest(e) {
+  var orderId = e.parameter.order_id;
+  var callback = e.parameter.callback || '';
+
+  if (!orderId) {
+    return createJsonOutput({ found: false, message: 'অর্ডার আইডি দিন' }, callback);
+  }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(ORDER_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) {
+    return createJsonOutput({ found: false, message: 'কোনো অর্ডার পাওয়া যায়নি' }, callback);
+  }
+
+  var data = sheet.getDataRange().getValues();
+  var statusMessages = {
+    '⏳ পেন্ডিং': { title: 'অপেক্ষমাণ', emoji: '⏳', message: 'আপনার অর্ডারটি পেন্ডিং আছে। আমরা খুব শীঘ্রই এটি প্রসেসিং শুরু করব।', color: '#e67e22' },
+    '🔧 প্রসেসিং': { title: 'প্রসেসিং', emoji: '🔧', message: 'আপনার অর্ডারটি প্রসেসিং চলছে। প্রস্তুত হলে শিপ করা হবে।', color: '#2980b9' },
+    '📦 শিপড': { title: 'শিপড', emoji: '📦', message: 'আপনার অর্ডার শিপ করা হয়েছে! শীঘ্রই ডেলিভারি পাবেন।', color: '#8e44ad' },
+    '✅ ডেলিভারড': { title: 'ডেলিভারড', emoji: '✅', message: 'আপনার অর্ডার ডেলিভারি সম্পন্ন হয়েছে। ধন্যবাদ!', color: '#27ae60' },
+    '❌ বাতিল': { title: 'বাতিল', emoji: '❌', message: 'দুঃখিত, আপনার অর্ডারটি বাতিল করা হয়েছে।', color: '#c0392b' }
+  };
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][16] === orderId) {
+      var status = data[i][14];
+      var info = statusMessages[status] || { title: status, emoji: '❓', message: 'স্ট্যাটাস পাওয়া যায়নি', color: '#7f6b5e' };
+      return createJsonOutput({
+        found: true,
+        order_id: data[i][16],
+        name: data[i][1],
+        phone: data[i][2],
+        product: data[i][8],
+        size: data[i][9],
+        quantity: data[i][10],
+        total: data[i][13],
+        date: data[i][0],
+        delivery_area: data[i][5],
+        payment: data[i][7],
+        address: data[i][4],
+        status: status,
+        status_title: info.title,
+        status_emoji: info.emoji,
+        status_message: info.message,
+        status_color: info.color
+      }, callback);
+    }
+  }
+
+  return createJsonOutput({ found: false, message: 'এই অর্ডার আইডি খুঁজে পাওয়া যায়নি। সঠিক অর্ডার নং দিন।' }, callback);
+}
+
+function createJsonOutput(data, callback) {
+  var output = JSON.stringify(data);
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + '(' + output + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(output)
     .setMimeType(ContentService.MimeType.JSON);
 }
 

@@ -55,6 +55,7 @@
                 <li><a href="#products">প্রোডাক্ট</a></li>
                 <li><a href="#about">আমাদের কথা</a></li>
                 <li><a href="#order-form">অর্ডার করুন</a></li>
+                <li><a href="#track-order">ট্র্যাক করুন</a></li>
                 <li><a href="#contact">যোগাযোগ</a></li>
             </ul>
         </div>
@@ -127,7 +128,7 @@
         <div class="container">
             <h2 class="section-title">অর্ডার <span>করুন</span></h2>
             <p class="section-sub">নিচের ফর্ম পূরণ করলে আমরা ২৪ ঘণ্টার মধ্যে যোগাযোগ করব</p>
-            <form class="order-form" id="orderForm" action="https://script.google.com/macros/s/AKfycbz40-G5BaXl-YZLoeFHFI_G8_MjE0a1DyoyRu2Ozn2gwlMj3jYeqgYoOfZKu-IHc5WV/exec" method="GET">
+            <form class="order-form" id="orderForm" action="https://script.google.com/macros/s/AKfycbyaxDzrZnY7N5f27Mqm5YQY_dQD-KlZMIHpm9FB6z0pO5j9UDtBl3r9q7NPRZ4-aybv/exec" method="GET">
                 <div class="form-row">
                     <div class="form-group">
                         <label>আপনার নাম *</label>
@@ -221,6 +222,19 @@
                 <p>আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
                 <button class="btn btn-outline" onclick="resetOrder()" style="margin-top:1rem;">🛒 আরেকটি অর্ডার করুন</button>
             </div>
+        </div>
+    </section>
+
+    <!-- Track Order -->
+    <section class="track-section" id="track-order">
+        <div class="container">
+            <h2 class="section-title">অর্ডার <span>ট্র্যাক করুন</span></h2>
+            <p class="section-sub">আপনার অর্ডার নং দিয়ে বর্তমান স্ট্যাটাস দেখুন</p>
+            <div class="track-form">
+                <input type="text" id="trackOrderInput" placeholder="MRN-20260701-XXXX" />
+                <button class="btn btn-primary" onclick="trackOrder()">ট্র্যাক করুন</button>
+            </div>
+            <div id="trackResult" class="track-result" style="display:none;"></div>
         </div>
     </section>
 
