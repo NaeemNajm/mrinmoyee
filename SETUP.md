@@ -391,7 +391,7 @@ function buildDashboard(dash, orderSheet) {
   var daysElapsed = Math.max(1, Math.round((today.getTime()-firstDate.getTime())/86400000)+1);
   var avgDaily = (n/daysElapsed).toFixed(1);
 
-  // ── KPI Cards (Row 3-5) ──
+  // ── KPI Cards (Row 3-5, no merge — values separate) ──
   var cards = [
     ['📦 মোট অর্ডার', n, '#c0392b'],
     ['💰 মোট আয় (৳)', totalRevenue, '#27ae60'],
@@ -403,10 +403,18 @@ function buildDashboard(dash, orderSheet) {
   for (var ci=0; ci<cards.length; ci++) {
     var col = ci<3?'A':'D';
     var crow = (ci<3?ci:(ci-3))+3;
-    dash.getRange(col+crow).setValue(cards[ci][0]).setFontSize(10).setFontColor('#7f6b5e');
-    dash.getRange(col+crow).offset(0,1).setValue(cards[ci][1].toString()).setFontSize(24).setFontWeight('bold').setFontColor(cards[ci][2]);
-    dash.getRange(col+crow+':'+String.fromCharCode(col.charCodeAt(0)+1)+crow).merge().setBackground('#fff')
+    var cardVal = cards[ci][0];
+    var cardNum = cards[ci][1].toString();
+    var cardClr = cards[ci][2];
+    // Label cell
+    dash.getRange(col+crow).setValue(cardVal).setFontSize(10).setFontColor('#7f6b5e')
+      .setBackground('#fff').setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
+    // Value cell (next column — no merge, so value stays)
+    dash.getRange(col+crow).offset(0,1).setValue(cardNum).setFontSize(24).setFontWeight('bold')
+      .setFontColor(cardClr).setBackground('#fff')
       .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
+    // Clear adjacent empty cells so old merges don't interfere
+    dash.getRange(col+crow).offset(0,2).clear();
     dash.setRowHeight(crow,55);
   }
 
