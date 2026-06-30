@@ -223,6 +223,16 @@ function copyMobileToWhatsApp() {
     }
 }
 
+// ========== Generate Order ID ==========
+function generateOrderId() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return 'MRN-' + y + m + d + '-' + rand;
+}
+
 // ========== Order Form Submit (CORS-safe: hidden iframe) ==========
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -231,6 +241,9 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     const btn = form.querySelector('.btn-submit');
     btn.textContent = 'সাবমিট হচ্ছে...';
     btn.disabled = true;
+
+    const orderId = generateOrderId();
+    document.getElementById('orderIdInput').value = orderId;
 
     let iframe = document.getElementById('hiddenFrame');
     if (!iframe) {
@@ -244,6 +257,7 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     form.target = 'hiddenFrame';
     form.submit();
 
+    document.getElementById('orderTrackingNumber').textContent = orderId;
     form.style.display = 'none';
     document.getElementById('orderSuccess').style.display = 'block';
 
