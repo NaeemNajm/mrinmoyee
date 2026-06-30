@@ -223,8 +223,8 @@ function copyMobileToWhatsApp() {
     }
 }
 
-// ========== Order Form Submit ==========
-document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
+// ========== Order Form Submit (CORS-safe: hidden iframe) ==========
+document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const form = e.target;
@@ -232,25 +232,29 @@ document.getElementById('orderForm')?.addEventListener('submit', async (e) => {
     btn.textContent = 'সাবমিট হচ্ছে...';
     btn.disabled = true;
 
-    try {
-        const data = new FormData(form);
-        const params = new URLSearchParams();
-        for (let [k, v] of data.entries()) params.append(k, v);
+    let iframe = document.getElementById('hiddenFrame');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'hiddenFrame';
+        iframe.name = 'hiddenFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
 
-        const res = await fetch(form.action + '?' + params.toString(), { method: 'GET' });
+    form.target = 'hiddenFrame';
+    form.submit();
 
-        form.style.display = 'none';
-        document.getElementById('orderSuccess').style.display = 'block';
+    form.style.display = 'none';
+    document.getElementById('orderSuccess').style.display = 'block';
 
-        // Facebook Pixel event
-        if (typeof fbq !== 'undefined') {
-            fbq('track', 'Purchase', { value: 100, currency: 'BDT' });
-        }
-    } catch (err) {
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'Purchase', { value: 100, currency: 'BDT' });
+    }
+
+    setTimeout(function() {
         btn.textContent = 'অর্ডার কনফার্ম করুন';
         btn.disabled = false;
-        alert('সাবমিট করতে সমস্যা হয়েছে। সরাসরি মেসেঞ্জারে অর্ডার জানান।');
-    }
+    }, 2000);
 });
 
 // ========== Init ==========

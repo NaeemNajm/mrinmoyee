@@ -104,6 +104,8 @@ function handleRequest(e) {
   sheet.appendRow(row);
   var lastRow = sheet.getLastRow();
   formatRow(sheet, lastRow);
+  sheet.getRange(lastRow, 3).setNumberFormat('@');
+  sheet.getRange(lastRow, 4).setNumberFormat('@');
   setStatusDropdown(sheet, lastRow);
   setWhatsAppLink(sheet, lastRow);
   updateDashboard(ss);
@@ -192,7 +194,7 @@ function setWhatsAppLink(sheet, row) {
   var colK = 'K' + row;
   var colN = 'N' + row;
 
-  var formula = '=HYPERLINK("https://wa.me/88"&MID(' + colD + ',2,99)&"?text="&ENCODEURL(' +
+  var formula = '=HYPERLINK("https://wa.me/880"&MID(' + colD + ',2,99)&"?text="&ENCODEURL(' +
     '"প্রিয় "&' + colB + '&CHAR(10)&' +
     '"মৃন্ময়ী - Mrinmoyee"&CHAR(10)&CHAR(10)&' +
     '"ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?"&CHAR(10)&CHAR(10)&' +
@@ -318,7 +320,7 @@ function buildDashboard(dash, orderSheet) {
 
   for (var ci = 0; ci < cards.length; ci++) {
     var col = ci < 3 ? 'A' : 'D';
-    var crow = ci < 3 ? (ci+3) : (ci-2);
+    var crow = (ci < 3 ? ci : (ci-3)) + 3;
     dash.getRange(col + crow).setValue(cards[ci][0]).setFontSize(10).setFontColor('#7f6b5e');
     dash.getRange(col + crow).offset(0,1).setValue(cards[ci][1] + '').setFontSize(24).setFontWeight('bold').setFontColor(cards[ci][2]);
     dash.getRange(col + crow + ':' + String.fromCharCode(col.charCodeAt(0)+1) + crow).merge().setBackground('#fff')
