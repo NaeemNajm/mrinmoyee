@@ -340,142 +340,198 @@ function updateDashboard(ss) {
   if (!dash || !orderSheet) return;
   dash.clear();
   dash.getRange(1, 1, dash.getMaxRows(), dash.getMaxColumns()).breakApart();
-  while (dash.getMaxRows() > 35) { dash.deleteRow(dash.getMaxRows()); }
+  while (dash.getMaxRows() > 55) { dash.deleteRow(dash.getMaxRows()); }
   buildDashboard(dash, orderSheet);
+}
+
+function mergeAndStyle(sheet, start, end, text, fontSize, fontColor, bgColor, bold, rowH) {
+  var r = sheet.getRange(start + ':' + end);
+  r.merge().setValue(text).setFontSize(fontSize).setFontColor(fontColor).setBackground(bgColor).setHorizontalAlignment('center');
+  if (bold) r.setFontWeight('bold');
+  if (rowH) sheet.setRowHeight(r.getRow(), rowH);
 }
 
 function buildDashboard(dash, orderSheet) {
   var allData = orderSheet.getDataRange().getValues();
-  // Index: 0=সময়, 1=নাম, 2=মোবাইল, 3=হোয়াটসঅ্যাপ, 4=ঠিকানা, 5=ডেলিভারি এরিয়া,
-  // 6=ডেলিভারি চার্জ, 7=পেমেন্ট, 8=প্রোডাক্ট, 9=সাইজ, 10=পরিমাণ, 11=মূল্য,
-  // 12=নোট, 13=নেট টোটাল, 14=স্ট্যাটাস, 15=WhatsApp
   var rows = [];
   for (var i = 1; i < allData.length; i++) {
-    if (allData[i][1]) rows.push(allData[i]);
+    if (allData[i][1] && allData[i][1].toString().trim() !== '') rows.push(allData[i]);
   }
   var n = rows.length;
 
-  // Title
-  dash.getRange('A1:F1').merge();
-  dash.getRange('A1').setValue('📊 মৃন্ময়ী - অর্ডার ড্যাশবোর্ড')
-    .setFontSize(18).setFontWeight('bold').setFontColor('#c0392b')
-    .setHorizontalAlignment('center').setBackground('#fdf8f4');
-  dash.setRowHeight(1, 40);
+  // ── Title ──
+  mergeAndStyle(dash, 'A1', 'F1', '📊 মৃন্ময়ী - Mrinmoyee ড্যাশবোর্ড', 18, '#c0392b', '#fdf8f4', true, 40);
 
   var today = new Date(); today.setHours(0,0,0,0);
-  var todayOrders = 0;
-  var thisMonth = 0;
-  var pending = 0;
-  var totalRevenue = 0;
-  var productCount = {};
+  var todayOrders=0, thisMonth=0, pending=0, delivered=0, canceled=0;
+  var totalRevenue=0, productQty={}, productRev={}, areaCnt={}, payCnt={}, dailyOrders={};
+  var bdMon = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
 
-  for (var r = 0; r < rows.length; r++) {
-    var rowDate = new Date(rows[r][0]);
-    rowDate.setHours(0,0,0,0);
-    if (rowDate.getTime() === today.getTime()) todayOrders++;
-    if (rowDate.getMonth() === today.getMonth()) thisMonth++;
-    if (rows[r][14] === '⏳ পেন্ডিং') pending++;
-    totalRevenue += parseInt(rows[r][13]) || 0;
-    var pName = rows[r][8] || 'অজানা';
-    productCount[pName] = (productCount[pName] || 0) + (parseInt(rows[r][10]) || 1);
+  for (var r=0; r<rows.length; r++) {
+    var rd = new Date(rows[r][0]); rd.setHours(0,0,0,0);
+    if (rd.getTime()===today.getTime()) todayOrders++;
+    if (rd.getMonth()===today.getMonth() && rd.getFullYear()===today.getFullYear()) thisMonth++;
+    var s = (rows[r][14]||'').toString().trim();
+    if (s==='⏳ পেন্ডিং') pending++; else if (s==='✅ ডেলিভারড') delivered++; else if (s==='❌ বাতিল') canceled++;
+    totalRevenue += parseInt(rows[r][13])||0;
+    var pn = (rows[r][8]||'অজানা').toString().trim();
+    var qt = parseInt(rows[r][10])||1;
+    productQty[pn] = (productQty[pn]||0)+qt;
+    productRev[pn] = (productRev[pn]||0)+(parseInt(rows[r][13])||0);
+    var ar = (rows[r][5]||'অন্যান্য').toString().trim();
+    areaCnt[ar] = (areaCnt[ar]||0)+1;
+    var pm = (rows[r][7]||'COD').toString().trim();
+    payCnt[pm] = (payCnt[pm]||0)+1;
+    var dk = rd.getFullYear()+'-'+(rd.getMonth()+1)+'-'+rd.getDate();
+    dailyOrders[dk] = (dailyOrders[dk]||0)+1;
   }
 
-  var firstDay = rows.length > 0 ? new Date(rows[0][0]) : new Date();
-  var daysDiff = Math.max(1, Math.ceil((new Date().getTime() - firstDay.getTime()) / (1000*86400)));
+  var firstDate = n>0 ? new Date(rows[0][0]) : new Date();
+  firstDate.setHours(0,0,0,0);
+  var daysElapsed = Math.max(1, Math.round((today.getTime()-firstDate.getTime())/86400000)+1);
+  var avgDaily = (n/daysElapsed).toFixed(1);
 
+  // ── KPI Cards (Row 3-5) ──
   var cards = [
     ['📦 মোট অর্ডার', n, '#c0392b'],
-    ['💰 নেট আয় (৳)', totalRevenue.toLocaleString('bn-IN'), '#27ae60'],
+    ['💰 মোট আয় (৳)', totalRevenue, '#27ae60'],
     ['🕐 আজকের', todayOrders, '#2980b9'],
-    ['📅 এই মাসের', thisMonth, '#8e44ad'],
+    ['📅 চলতি মাস', thisMonth, '#8e44ad'],
     ['⏳ পেন্ডিং', pending, '#e67e22'],
-    ['📈 গড়/দিন', n > 0 ? (n/daysDiff).toFixed(1) : '0', '#d4a853']
+    ['📈 গড়/দিন', avgDaily, '#d4a853']
   ];
-
-  for (var ci = 0; ci < cards.length; ci++) {
-    var col = ci < 3 ? 'A' : 'D';
-    var crow = (ci < 3 ? ci : (ci-3)) + 3;
-    dash.getRange(col + crow).setValue(cards[ci][0]).setFontSize(10).setFontColor('#7f6b5e');
-    dash.getRange(col + crow).offset(0,1).setValue(cards[ci][1] + '').setFontSize(24).setFontWeight('bold').setFontColor(cards[ci][2]);
-    dash.getRange(col + crow + ':' + String.fromCharCode(col.charCodeAt(0)+1) + crow).merge().setBackground('#fff')
-      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID);
-    dash.setRowHeight(crow, 55);
+  for (var ci=0; ci<cards.length; ci++) {
+    var col = ci<3?'A':'D';
+    var crow = (ci<3?ci:(ci-3))+3;
+    dash.getRange(col+crow).setValue(cards[ci][0]).setFontSize(10).setFontColor('#7f6b5e');
+    dash.getRange(col+crow).offset(0,1).setValue(cards[ci][1].toString()).setFontSize(24).setFontWeight('bold').setFontColor(cards[ci][2]);
+    dash.getRange(col+crow+':'+String.fromCharCode(col.charCodeAt(0)+1)+crow).merge().setBackground('#fff')
+      .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
+    dash.setRowHeight(crow,55);
   }
 
-  // Top Products
-  var topStart = 11;
-  dash.getRange('A' + topStart + ':F' + topStart).merge();
-  dash.getRange('A' + topStart).setValue('🏆 জনপ্রিয় প্রোডাক্ট')
-    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
-
-  var sortedProducts = Object.entries(productCount).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 8);
-
-  var dashHeaders = [['A','#'],['B:C','প্রোডাক্ট'],['D','বিক্রি'],['E:F','আয় (৳)']];
-  for (var hi = 0; hi < dashHeaders.length; hi++) {
-    dash.getRange(dashHeaders[hi][0] + (topStart+1)).setValue(dashHeaders[hi][1])
-      .setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  // ── Section: স্ট্যাটাস ওভারভিউ ──
+  var row=7;
+  mergeAndStyle(dash,'A'+row,'F'+row,'📊 স্ট্যাটাস ওভারভিউ',14,'#2d1b0e','#f0e4d9',true,30);
+  row++;
+  dash.getRange('A'+row+':B'+row).merge().setValue('স্ট্যাটাস').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('C'+row).setValue('কাউন্ট').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('D'+row+':F'+row).merge().setValue('প্রসেন্টেজ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  var stats = [
+    ['⏳ পেন্ডিং',pending,'#e67e22','#fef9e7'],
+    ['🔧 প্রসেসিং',0,'#2980b9','#ebf5fb'],
+    ['📦 শিপড',0,'#8e44ad','#f4ecf7'],
+    ['✅ ডেলিভারড',delivered,'#27ae60','#d5f5e3'],
+    ['❌ বাতিল',canceled,'#c0392b','#f2d7d5']
+  ];
+  // Count processing & shipped from rows
+  for (var rr=0; rr<rows.length; rr++) {
+    var st = (rows[rr][14]||'').toString().trim();
+    if (st==='🔧 প্রসেসিং') stats[1][1]++;
+    else if (st==='📦 শিপড') stats[2][1]++;
+  }
+  for (var si=0; si<stats.length; si++) {
+    var sr=row+1+si, cnt=stats[si][1], pct=n>0?(cnt/n*100).toFixed(1):'0.0';
+    dash.getRange('A'+sr+':B'+sr).merge().setValue(stats[si][0]).setBackground(stats[si][3]).setFontColor(stats[si][2]).setFontWeight('bold');
+    dash.getRange('C'+sr).setValue(cnt).setHorizontalAlignment('center').setFontWeight('bold');
+    var barLen=Math.max(1,Math.round((cnt/Math.max(1,n))*40));
+    var bar=''; for (var b=0; b<barLen&&b<40; b++) bar+='█';
+    var pctStr=pct; if (pctStr.indexOf('.')>0) { var parts=pctStr.split('.'); pctStr=parts[0]+'.'+parts[1].charAt(0); }
+    dash.getRange('D'+sr+':F'+sr).merge().setValue(bar+' '+pctStr+'%').setFontFamily('Courier New').setFontSize(10).setFontColor(stats[si][2]);
+    dash.getRange('A'+sr+':F'+sr).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  for (var pi = 0; pi < sortedProducts.length; pi++) {
-    var pr = topStart + 2 + pi;
-    var productName = sortedProducts[pi][0];
-    var productQty = sortedProducts[pi][1];
-    var productRevenue = 0;
-    for (var ri = 0; ri < rows.length; ri++) {
-      if (rows[ri][8] === productName) productRevenue += parseInt(rows[ri][13]) || 0;
+  // ── Section: পেমেন্ট মেথড ──
+  row = sr+2;
+  mergeAndStyle(dash,'A'+row,'F'+row,'💳 পেমেন্ট মেথড',14,'#2d1b0e','#f0e4d9',true,30);
+  row++;
+  var payArr=[];
+  for (var pk in payCnt) { if (payCnt.hasOwnProperty(pk)) payArr.push([pk,payCnt[pk]]); }
+  payArr.sort(function(a,b){return b[1]-a[1];});
+  dash.getRange('A'+row+':B'+row).merge().setValue('পদ্ধতি').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  dash.getRange('C'+row+':D'+row).merge().setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('E'+row+':F'+row).merge().setValue('%').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  for (var pi=0; pi<payArr.length; pi++) {
+    var pr=row+1+pi, pc=payArr[pi][1], pp=n>0?(pc/n*100).toFixed(1):'0.0';
+    dash.getRange('A'+pr+':B'+pr).merge().setValue(payArr[pi][0]).setFontSize(10);
+    dash.getRange('C'+pr+':D'+pr).merge().setValue(pc).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('E'+pr+':F'+pr).merge().setValue(pp+'%').setHorizontalAlignment('center');
+    dash.getRange('A'+pr+':F'+pr).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
+  }
+
+  // ── Section: ডেলিভারি এরিয়া ──
+  row = pr+2;
+  mergeAndStyle(dash,'A'+row,'F'+row,'🚚 ডেলিভারি এরিয়া (টপ ১০)',14,'#2d1b0e','#f0e4d9',true,30);
+  row++;
+  var areaArr=[];
+  for (var ak in areaCnt) { if (areaCnt.hasOwnProperty(ak)) areaArr.push([ak,areaCnt[ak]]); }
+  areaArr.sort(function(a,b){return b[1]-a[1];});
+  dash.getRange('A'+row+':C'+row).merge().setValue('এলাকা').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
+  dash.getRange('D'+row+':E'+row).merge().setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('F'+row).setValue('%').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  for (var ai=0; ai<Math.min(areaArr.length,10); ai++) {
+    var ar=row+1+ai, ac=areaArr[ai][1], ap=n>0?(ac/n*100).toFixed(1):'0.0';
+    dash.getRange('A'+ar+':C'+ar).merge().setValue(areaArr[ai][0]).setFontSize(10);
+    dash.getRange('D'+ar+':E'+ar).merge().setValue(ac).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('F'+ar).setValue(ap+'%').setHorizontalAlignment('center');
+    dash.getRange('A'+ar+':F'+ar).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
+  }
+
+  // ── Section: জনপ্রিয় প্রোডাক্ট ──
+  row = ar+2;
+  mergeAndStyle(dash,'A'+row,'F'+row,'🏆 জনপ্রিয় প্রোডাক্ট',14,'#2d1b0e','#f0e4d9',true,30);
+  row++;
+  var prodList=[];
+  for (var pn2 in productQty) { if (productQty.hasOwnProperty(pn2)) prodList.push([pn2,productQty[pn2],productRev[pn2]||0]); }
+  prodList.sort(function(a,b){return b[1]-a[1];});
+  prodList=prodList.slice(0,8);
+  var pHdrs=[['A','#'],['B:C','প্রোডাক্ট'],['D','বিক্রি'],['E:F','আয় (৳)']];
+  for (var hi=0; hi<pHdrs.length; hi++) {
+    var hCol=pHdrs[hi][0];
+    if (hCol.indexOf(':')>-1) {
+      var pts=hCol.split(':');
+      dash.getRange(pts[0]+row+':'+pts[1]+row).merge().setValue(pHdrs[hi][1]).setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+    } else {
+      dash.getRange(hCol+row).setValue(pHdrs[hi][1]).setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
     }
-    dash.getRange('A' + pr).setValue(pi+1).setHorizontalAlignment('center');
-    dash.getRange('B' + pr + ':C' + pr).merge().setValue(productName).setFontSize(10);
-    dash.getRange('D' + pr).setValue(productQty).setHorizontalAlignment('center').setFontWeight('bold');
-    dash.getRange('E' + pr + ':F' + pr).merge().setValue(productRevenue)
-      .setHorizontalAlignment('right').setFontColor('#27ae60').setFontWeight('bold');
-    dash.getRange('A' + pr + ':F' + pr)
-      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID)
-      .setBackground(pi%2===0?'#fdf8f4':'#fff');
+  }
+  for (var pii=0; pii<prodList.length; pii++) {
+    var pr2=row+1+pii;
+    dash.getRange('A'+pr2).setValue(pii+1).setHorizontalAlignment('center');
+    dash.getRange('B'+pr2+':C'+pr2).merge().setValue(prodList[pii][0]).setFontSize(10);
+    dash.getRange('D'+pr2).setValue(prodList[pii][1]).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('E'+pr2+':F'+pr2).merge().setValue(prodList[pii][2]).setHorizontalAlignment('right').setFontColor('#27ae60').setFontWeight('bold');
+    dash.getRange('A'+pr2+':F'+pr2).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID).setBackground(pii%2===0?'#fdf8f4':'#fff');
   }
 
-  // 7-day trend
-  var trendStart = topStart + 2 + Math.min(sortedProducts.length, 8) + 1;
-  dash.getRange('A' + trendStart + ':F' + trendStart).merge();
-  dash.getRange('A' + trendStart).setValue('📆 গত ৭ দিনের অর্ডার')
-    .setFontSize(14).setFontWeight('bold').setFontColor('#2d1b0e').setBackground('#f0e4d9');
-
-  var dayKeys = [];
-  var dayValues = {};
-  for (var di = 6; di >= 0; di--) {
-    var d = new Date(today);
-    d.setDate(d.getDate() - di);
-    var key = d.toLocaleDateString('bn-BD', {day:'numeric',month:'short'});
-    dayKeys.push(key);
-    dayValues[key] = 0;
+  // ── Section: গত ৭ দিনের ট্রেন্ড ──
+  row = pr2+2;
+  mergeAndStyle(dash,'A'+row,'F'+row,'📆 গত ৭ দিনের অর্ডার ট্রেন্ড',14,'#2d1b0e','#f0e4d9',true,30);
+  row++;
+  var trendData=[];
+  for (var d=6; d>=0; d--) {
+    var dt=new Date(today); dt.setDate(dt.getDate()-d);
+    var dk2=dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate();
+    trendData.push({label:dt.getDate()+' '+bdMon[dt.getMonth()].substring(0,3), count:dailyOrders[dk2]||0});
   }
-  for (var ri2 = 0; ri2 < rows.length; ri2++) {
-    var d2 = new Date(rows[ri2][0]);
-    var key2 = d2.toLocaleDateString('bn-BD', {day:'numeric',month:'short'});
-    if (dayValues[key2] !== undefined) dayValues[key2]++;
-  }
-
-  dash.getRange('A' + (trendStart+1)).setValue('তারিখ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-  dash.getRange('B' + (trendStart+1) + ':E' + (trendStart+1)).merge().setValue('গ্রাফ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-  dash.getRange('F' + (trendStart+1)).setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold');
-
-  for (var tdi = 0; tdi < dayKeys.length; tdi++) {
-    var tr = trendStart + 2 + tdi;
-    var val = dayValues[dayKeys[tdi]];
-    dash.getRange('A' + tr).setValue(dayKeys[tdi]);
-    dash.getRange('B' + tr + ':E' + tr).merge();
-    var bar = '';
-    for (var bi = 0; bi < Math.min(val, 10); bi++) bar += '█';
-    for (var bj = 0; bj < Math.max(0, 10 - val); bj++) bar += '░';
-    dash.getRange('B' + tr + ':E' + tr).setValue(bar).setFontFamily('Courier New').setFontSize(12)
-      .setFontColor(val > 0 ? '#27ae60' : '#ddd5cc');
-    dash.getRange('F' + tr).setValue(val).setHorizontalAlignment('center').setFontWeight('bold');
-    dash.getRange('A' + tr + ':F' + tr)
-      .setBorder(true, true, true, true, null, null, '#eee5dd', SpreadsheetApp.BorderStyle.SOLID);
+  var maxC=1;
+  for (var ti=0; ti<trendData.length; ti++) { if (trendData[ti].count>maxC) maxC=trendData[ti].count; }
+  dash.getRange('A'+row).setValue('তারিখ').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('B'+row+':E'+row).merge().setValue('গ্রাফ (█='+Math.ceil(maxC/20)+' অর্ডার)').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  dash.getRange('F'+row).setValue('অর্ডার').setBackground('#c0392b').setFontColor('#fff').setFontWeight('bold').setHorizontalAlignment('center');
+  for (var tii=0; tii<trendData.length; tii++) {
+    var tr2=row+1+tii, val=trendData[tii].count;
+    var barLen2=maxC>0?Math.round((val/maxC)*20):0; if (barLen2<1&&val>0) barLen2=1;
+    var barStr=''; for (var b2=0; b2<barLen2; b2++) barStr+='█';
+    dash.getRange('A'+tr2).setValue(trendData[tii].label).setFontSize(10).setHorizontalAlignment('center');
+    dash.getRange('B'+tr2+':E'+tr2).merge().setValue(barStr).setFontFamily('Courier New').setFontSize(12).setFontColor(val>0?'#27ae60':'#ddd5cc');
+    dash.getRange('F'+tr2).setValue(val).setHorizontalAlignment('center').setFontWeight('bold');
+    dash.getRange('A'+tr2+':F'+tr2).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  dash.autoResizeColumns(1, 6);
-  dash.setColumnWidth(2, 200);
+  dash.autoResizeColumns(1,6);
+  dash.setColumnWidth(2,180);
+  dash.setColumnWidth(5,120);
 }
 ```
 
