@@ -126,12 +126,22 @@ function updatePrice() {
 function calcTotal() {
     const price = parseInt(document.getElementById('priceInput')?.value || 0);
     const qty = parseInt(document.getElementById('quantityInput')?.value || 1);
-    const discount = parseInt(document.getElementById('discountInput')?.value || 0);
     const delivery = parseInt(document.getElementById('deliveryInput')?.value || 0);
-    const total = (price * qty) - discount + delivery;
+    const total = (price * qty) + delivery;
 
     document.getElementById('totalAmount').textContent = `৳${total}`;
     document.getElementById('totalInput').value = total;
+}
+
+function resetOrder() {
+    document.getElementById('orderSuccess').style.display = 'none';
+    document.getElementById('orderForm').style.display = 'block';
+    document.getElementById('orderForm').reset();
+    document.getElementById('priceDisplay').textContent = 'প্রোডাক্ট সিলেক্ট করুন';
+    document.getElementById('totalAmount').textContent = '৳০';
+    document.getElementById('totalInput').value = '0';
+    document.getElementById('priceInput').value = '0';
+    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ========== Filter Buttons ==========

@@ -171,14 +171,11 @@
                         <input type="hidden" name="price" id="priceInput" value="0" />
                     </div>
                     <div class="form-group">
-                        <label>ডিসকাউন্ট (৳)</label>
-                        <input type="number" name="discount" id="discountInput" value="0" min="0" oninput="calcTotal()" />
-                    </div>
-                    <div class="form-group">
                         <label>ডেলিভারি চার্জ (৳)</label>
                         <input type="number" name="delivery" id="deliveryInput" value="60" min="0" oninput="calcTotal()" />
                     </div>
                 </div>
+                <input type="hidden" name="discount" id="discountInput" value="0" />
                 <div class="total-box" id="totalBox">
                     <span>মোট payable: </span>
                     <strong id="totalAmount">৳০</strong>
@@ -195,6 +192,7 @@
                 <div class="success-icon">✅</div>
                 <h3>অর্ডার সফল হয়েছে!</h3>
                 <p>আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+                <button class="btn btn-outline" onclick="resetOrder()" style="margin-top:1rem;">🛒 আরেকটি অর্ডার করুন</button>
             </div>
         </div>
     </section>

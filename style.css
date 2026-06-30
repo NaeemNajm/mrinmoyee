@@ -410,7 +410,7 @@ ul { list-style: none; }
     padding: 1rem;
     font-size: 1.1rem;
 }
-.form-price-row { grid-template-columns: 1fr 1fr 1fr; }
+.form-price-row { grid-template-columns: 1fr 1fr; }
 .price-display {
     padding: 0.8rem 1rem;
     background: #f0e4d9;
