@@ -14,8 +14,11 @@ const unsplashProducts = [
     'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80',
 ];
 
-// ========== Product Data ==========
-const products = [
+// ========== Product Data (dynamic from API, fallback to hardcoded) ==========
+const API_URL = document.getElementById('orderForm')?.action || '';
+let products = [];
+
+const FALLBACK_PRODUCTS = [
     {
         id: 1, name: 'সোনালী প্রিয়া', desc: 'সোনালী কুন্দন ডিজাইনের চুড়ি সেট',
         price: 350, color: '#d4a853', colorName: 'golden', category: 'golden',
@@ -77,6 +80,45 @@ const products = [
         image: unsplashProducts[6]
     }
 ];
+
+function loadProductsFromAPI() {
+    if (!API_URL) { useFallback(); return; }
+    var cb = 'loadProdCB_' + Date.now();
+    window[cb] = function(data) {
+        delete window[cb];
+        var s = document.getElementById('_lp_' + cb);
+        if (s) s.remove();
+        if (data && data.products && Array.isArray(data.products) && data.products.length > 0) {
+            products = data.products.map(function(p) {
+                return {
+                    id: parseInt(p.id) || 0,
+                    name: p.name || '',
+                    desc: p.desc || '',
+                    price: parseInt(p.price) || 0,
+                    color: p.color || '#999',
+                    colorName: p.colorName || '',
+                    category: p.category || 'golden',
+                    sizes: (p.sizes || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+                    tag: p.tag || '',
+                    image: p.image || ''
+                };
+            });
+            if (products.length > 0) { renderProducts(); populateSelect(); return; }
+        }
+        useFallback();
+    };
+    var s = document.createElement('script');
+    s.id = '_lp_' + cb;
+    s.src = API_URL + '?action=getProducts&callback=' + cb;
+    s.onerror = function() { delete window[cb]; useFallback(); };
+    document.body.appendChild(s);
+}
+
+function useFallback() {
+    products = FALLBACK_PRODUCTS;
+    renderProducts();
+    populateSelect();
+}
 
 // ========== Delivery Areas ==========
 const deliveryAreas = [
@@ -386,5 +428,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ========== Init ==========
-renderProducts();
-populateSelect();
+loadProductsFromAPI();

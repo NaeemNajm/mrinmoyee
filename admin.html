@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>অ্যাডমিন - মৃন্ময়ী</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; background: #0d0a08; color: #e8ddd0; min-height: 100vh; }
+        .admin-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #2d1b0e; }
+        .admin-header h1 { font-size: 1.4rem; color: #d4a853; }
+        .admin-header h1 span { color: #c0392b; font-size: 0.8rem; display: block; font-weight: 400; }
+        .admin-actions { display: flex; gap: 10px; }
+        .admin-stats { display: flex; gap: 20px; padding: 15px 0; color: #7f6b5e; font-size: 0.9rem; }
+        .admin-stats strong { color: #d4a853; }
+
+        .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-box { background: #1a120e; border: 1px solid #2d1b0e; border-radius: 12px; padding: 40px; width: 100%; max-width: 380px; text-align: center; }
+        .login-box h2 { color: #d4a853; margin-bottom: 5px; }
+        .login-box p { color: #7f6b5e; font-size: 0.85rem; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px 16px; background: #0d0a08; border: 1px solid #2d1b0e; border-radius: 8px; color: #e8ddd0; font-size: 1rem; font-family: inherit; margin-bottom: 15px; }
+        .login-box input:focus { outline: none; border-color: #d4a853; }
+        .login-error { color: #c0392b; font-size: 0.85rem; margin-bottom: 10px; display: none; }
+        .login-error.show { display: block; }
+        .login-loading { color: #7f6b5e; font-size: 0.85rem; display: none; }
+        .login-loading.show { display: block; }
+
+        .btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95rem; font-family: inherit; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #c0392b, #d4a853); color: #fff; font-weight: 600; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(192,57,43,0.4); }
+        .btn-secondary { background: #2d1b0e; color: #d4a853; border: 1px solid #4a2c1a; }
+        .btn-secondary:hover { background: #3d2515; }
+        .btn-danger { background: #7b241c; color: #fff; }
+        .btn-danger:hover { background: #922b21; }
+        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+        .btn-success { background: #27ae60; color: #fff; }
+        .btn-success:hover { background: #229954; }
+
+        .main-screen { display: none; }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px; flex-wrap: wrap; }
+
+        .product-table-wrap { overflow-x: auto; background: #1a120e; border: 1px solid #2d1b0e; border-radius: 10px; }
+        .product-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .product-table th { background: #2d1b0e; color: #d4a853; padding: 10px 12px; text-align: left; font-weight: 600; white-space: nowrap; }
+        .product-table td { padding: 10px 12px; border-top: 1px solid #2d1b0e; }
+        .product-table tr:hover td { background: rgba(212,168,83,0.03); }
+        .product-table .col-name { min-width: 130px; }
+        .product-table .col-desc { min-width: 160px; color: #7f6b5e; font-size: 0.8rem; }
+        .product-table .col-price { white-space: nowrap; color: #d4a853; font-weight: 600; }
+        .product-table .col-cat { white-space: nowrap; }
+        .product-table .col-tag { white-space: nowrap; }
+        .product-table .col-sizes { white-space: nowrap; color: #7f6b5e; font-size: 0.8rem; }
+        .product-table .col-actions { white-space: nowrap; text-align: right; }
+        .product-table .col-actions button { margin-left: 5px; }
+
+        .color-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .tag-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; background: rgba(212,168,83,0.15); color: #d4a853; }
+        .tag-badge.premium { background: rgba(142,68,173,0.2); color: #bb8fce; }
+        .tag-badge.bestseller { background: rgba(192,57,43,0.2); color: #e74c3c; }
+        .status-active { color: #27ae60; }
+        .status-inactive { color: #7f6b5e; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #7f6b5e; }
+        .empty-state h3 { font-size: 1.2rem; margin-bottom: 8px; color: #999; }
+        .empty-state p { font-size: 0.9rem; }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #27ae60; color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 0.9rem; font-family: inherit; display: none; z-index: 9999; animation: slideUp 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .toast.error { background: #c0392b; }
+        .toast.show { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 9998; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #1a120e; border: 1px solid #2d1b0e; border-radius: 14px; padding: 30px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal h3 { color: #d4a853; margin-bottom: 20px; font-size: 1.2rem; }
+        .modal .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .modal .form-row .form-group { flex: 1; }
+        .modal .form-group { margin-bottom: 15px; }
+        .modal label { display: block; color: #7f6b5e; font-size: 0.8rem; margin-bottom: 4px; }
+        .modal input, .modal select, .modal textarea { width: 100%; padding: 10px 14px; background: #0d0a08; border: 1px solid #2d1b0e; border-radius: 8px; color: #e8ddd0; font-size: 0.9rem; font-family: inherit; }
+        .modal input:focus, .modal select:focus, .modal textarea:focus { outline: none; border-color: #d4a853; }
+        .modal textarea { resize: vertical; min-height: 60px; }
+        .modal .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .modal .checkbox-group input[type="checkbox"] { width: auto; }
+        .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+        @media (max-width: 768px) {
+            .admin-container { padding: 10px; }
+            .admin-header { flex-direction: column; gap: 10px; text-align: center; }
+            .product-table th:nth-child(2), .product-table td:nth-child(2) { display: none; }
+            .modal .form-row { flex-direction: column; gap: 0; }
+            .modal { padding: 20px; }
+            .toast { left: 20px; right: 20px; bottom: 20px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <h2>মৃন্ময়ী</h2>
+        <p>প্রোডাক্ট ম্যানেজমেন্ট প্যানেল</p>
+        <input type="password" id="passwordInput" placeholder="অ্যাডমিন পাসওয়ার্ড" onkeydown="if(event.key==='Enter') login()" />
+        <div class="login-error" id="loginError">ভুল পাসওয়ার্ড</div>
+        <div class="login-loading" id="loginLoading">ভেরিফাই করা হচ্ছে...</div>
+        <button class="btn btn-primary" onclick="login()" style="width:100%">প্রবেশ করুন</button>
+    </div>
+</div>
+
+<div class="main-screen" id="mainScreen">
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1>মৃন্ময়ী <span>প্রোডাক্ট ম্যানেজমেন্ট</span></h1>
+            </div>
+            <div class="admin-actions">
+                <button class="btn btn-sm btn-secondary" onclick="window.open('index.html','_blank')">সাইট দেখুন</button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">লগআউট</button>
+            </div>
+        </div>
+
+        <div class="admin-stats">
+            <span>মোট প্রোডাক্ট: <strong id="totalCount">০</strong></span>
+            <span>সর্বশেষ আপডেট: <strong id="lastUpdated">--</strong></span>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="openAddModal()">+ নতুন প্রোডাক্ট</button>
+            <button class="btn btn-sm btn-secondary" onclick="loadProducts()">⟳ রিফ্রেশ</button>
+        </div>
+
+        <div class="product-table-wrap" id="tableWrap">
+            <div class="empty-state" id="emptyState">
+                <h3>কোনো প্রোডাক্ট নেই</h3>
+                <p>"+ নতুন প্রোডাক্ট" বাটনে ক্লিক করে প্রথম প্রোডাক্ট যোগ করুন।</p>
+            </div>
+            <table class="product-table" id="productTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>রং</th>
+                        <th>নাম</th>
+                        <th>দাম</th>
+                        <th>ক্যাটাগরি</th>
+                        <th>ট্যাগ</th>
+                        <th>সাইজ</th>
+                        <th style="text-align:right;">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="productBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal">
+        <h3 id="modalTitle">নতুন প্রোডাক্ট</h3>
+        <input type="hidden" id="editId" value="" />
+        <div class="form-row">
+            <div class="form-group">
+                <label>নাম *</label>
+                <input type="text" id="pName" placeholder="যেমন: সোনালী প্রিয়া" />
+            </div>
+            <div class="form-group">
+                <label>দাম (৳) *</label>
+                <input type="number" id="pPrice" placeholder="৩৫০" min="0" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>বর্ণনা *</label>
+            <textarea id="pDesc" placeholder="যেমন: সোনালী কুন্দন ডিজাইনের চুড়ি সেট"></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>রং (হেক্স কোড)</label>
+                <input type="text" id="pColor" placeholder="#d4a853" />
+            </div>
+            <div class="form-group">
+                <label>রংয়ের নাম</label>
+                <input type="text" id="pColorName" placeholder="golden" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>ক্যাটাগরি *</label>
+                <select id="pCategory">
+                    <option value="golden">সোনালী (Golden)</option>
+                    <option value="red">লাল (Red)</option>
+                    <option value="blue">নীল (Blue)</option>
+                    <option value="green">সবুজ (Green)</option>
+                    <option value="premium">প্রিমিয়াম (Premium)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>সাইজ (কমা দিয়ে আলাদা)</label>
+                <input type="text" id="pSizes" placeholder="M, L, XL" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>ট্যাগ (ঐচ্ছিক)</label>
+                <input type="text" id="pTag" placeholder="যেমন: বেস্টসেলার, নতুন, প্রিমিয়াম" />
+            </div>
+            <div class="form-group">
+                <label>স্ট্যাটাস</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="pActive" checked />
+                    <label style="margin:0;">সক্রিয়</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>ছবির URL *</label>
+            <input type="text" id="pImage" placeholder="images/ফাইল.jpg অথবা https://... URL" />
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">বাতিল</button>
+            <button class="btn btn-success" id="saveBtn" onclick="saveProduct()">সেভ করুন</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width:400px;">
+        <h3 style="color:#c0392b;">প্রোডাক্ট ডিলিট করবেন?</h3>
+        <p id="deleteName" style="color:#e8ddd0;margin-bottom:6px;"></p>
+        <p style="color:#7f6b5e;font-size:0.85rem;">এই প্রোডাক্ট স্থায়ীভাবে মুছে যাবে।</p>
+        <input type="hidden" id="deleteId" value="" />
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">বাতিল</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">ডিলিট করুন</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbx_mSFby4uET0ACqFEdVvw1u954wOQj4kkb-bBLTsKxGAxZcxYcHjae21Y_AVD1EjmvEA/exec';
+
+function jsonp(url, callbackName, callback) {
+    window[callbackName] = function(data) {
+        delete window[callbackName];
+        var s = document.getElementById('_jp_' + callbackName);
+        if (s) s.remove();
+        callback(data);
+    };
+    var s = document.createElement('script');
+    s.id = '_jp_' + callbackName;
+    var sep = url.indexOf('?') > -1 ? '&' : '?';
+    s.src = url + sep + 'callback=' + callbackName;
+    s.onerror = function() {
+        delete window[callbackName];
+        callback({error: 'Network error'});
+    };
+    document.body.appendChild(s);
+}
+
+function login() {
+    var pass = document.getElementById('passwordInput').value;
+    if (!pass) return;
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('loginLoading').classList.add('show');
+    var cb = 'authCB_' + Date.now();
+    jsonp(API_URL + '?action=auth&password=' + encodeURIComponent(pass), cb, function(data) {
+        document.getElementById('loginLoading').classList.remove('show');
+        if (data.valid) {
+            localStorage.setItem('mrinmoyee_admin_pass', pass);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'block';
+            loadProducts();
+        } else {
+            document.getElementById('loginError').textContent = data.message || 'ভুল পাসওয়ার্ড';
+            document.getElementById('loginError').classList.add('show');
+        }
+    });
+}
+
+function logout() {
+    localStorage.removeItem('mrinmoyee_admin_pass');
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('passwordInput').value = '';
+}
+
+var products = [];
+
+function loadProducts() {
+    document.getElementById('lastUpdated').textContent = 'লোড হচ্ছে...';
+    var pass = localStorage.getItem('mrinmoyee_admin_pass');
+    var cb = 'prodCB_' + Date.now();
+    jsonp(API_URL + '?action=getProducts&password=' + encodeURIComponent(pass), cb, function(data) {
+        if (data.error) {
+            showToast('ডেটা লোড করতে সমস্যা: ' + data.error, true);
+            return;
+        }
+        if (data.products && Array.isArray(data.products)) {
+            products = data.products;
+        } else {
+            products = [];
+        }
+        renderTable();
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString('bn-BD');
+    });
+}
+
+function renderTable() {
+    document.getElementById('totalCount').textContent = products.length;
+    var tbody = document.getElementById('productBody');
+    var table = document.getElementById('productTable');
+    var empty = document.getElementById('emptyState');
+
+    if (products.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+
+    table.style.display = '';
+    empty.style.display = 'none';
+
+    tbody.innerHTML = products.map(function(p) {
+        var tagClass = '';
+        var tagText = p.tag || '';
+        if (tagText === 'প্রিমিয়াম') tagClass = 'premium';
+        else if (tagText === 'বেস্টসেলার') tagClass = 'bestseller';
+
+        return '<tr>' +
+            '<td><span class="color-dot" style="background:' + (p.color || '#999') + '"></span></td>' +
+            '<td class="col-name">' + esc(p.name) + '</td>' +
+            '<td class="col-price">৳' + p.price + '</td>' +
+            '<td class="col-cat">' + esc(p.category || '-') + '</td>' +
+            '<td class="col-tag">' + (tagText ? '<span class="tag-badge ' + tagClass + '">' + esc(tagText) + '</span>' : '-') + '</td>' +
+            '<td class="col-sizes">' + esc(p.sizes || '-') + '</td>' +
+            '<td class="col-actions">' +
+                '<button class="btn btn-sm btn-secondary" onclick="openEditModal(\'' + p.id + '\')">সম্পাদনা</button>' +
+                '<button class="btn btn-sm btn-danger" onclick="openDeleteModal(\'' + p.id + '\',\'' + esc(p.name) + '\')">ডিলিট</button>' +
+            '</td>' +
+        '</tr>';
+    }).join('');
+}
+
+function esc(t) {
+    if (!t) return '';
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'নতুন প্রোডাক্ট';
+    document.getElementById('editId').value = '';
+    document.getElementById('pName').value = '';
+    document.getElementById('pDesc').value = '';
+    document.getElementById('pPrice').value = '';
+    document.getElementById('pColor').value = '#d4a853';
+    document.getElementById('pColorName').value = '';
+    document.getElementById('pCategory').value = 'golden';
+    document.getElementById('pSizes').value = 'M, L';
+    document.getElementById('pTag').value = '';
+    document.getElementById('pActive').checked = true;
+    document.getElementById('pImage').value = '';
+    document.getElementById('saveBtn').textContent = 'সেভ করুন';
+    document.getElementById('productModal').classList.add('show');
+}
+
+function openEditModal(id) {
+    var p = products.find(function(x) { return String(x.id) === String(id); });
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'প্রোডাক্ট সম্পাদনা';
+    document.getElementById('editId').value = p.id;
+    document.getElementById('pName').value = p.name || '';
+    document.getElementById('pDesc').value = p.desc || '';
+    document.getElementById('pPrice').value = p.price || '';
+    document.getElementById('pColor').value = p.color || '#d4a853';
+    document.getElementById('pColorName').value = p.colorName || '';
+    document.getElementById('pCategory').value = p.category || 'golden';
+    document.getElementById('pSizes').value = (p.sizes || '').replace(/,/g, ', ');
+    document.getElementById('pTag').value = p.tag || '';
+    document.getElementById('pActive').checked = p.active !== 'NO';
+    document.getElementById('pImage').value = p.image || '';
+    document.getElementById('saveBtn').textContent = 'আপডেট করুন';
+    document.getElementById('productModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('productModal').classList.remove('show');
+}
+
+function saveProduct() {
+    var id = document.getElementById('editId').value;
+    var data = {
+        action: 'saveProduct',
+        password: localStorage.getItem('mrinmoyee_admin_pass'),
+        id: id || '',
+        name: document.getElementById('pName').value.trim(),
+        desc: document.getElementById('pDesc').value.trim(),
+        price: document.getElementById('pPrice').value,
+        color: document.getElementById('pColor').value.trim(),
+        colorName: document.getElementById('pColorName').value.trim(),
+        category: document.getElementById('pCategory').value,
+        sizes: document.getElementById('pSizes').value.trim(),
+        tag: document.getElementById('pTag').value.trim(),
+        active: document.getElementById('pActive').checked ? 'YES' : 'NO',
+        image: document.getElementById('pImage').value.trim()
+    };
+
+    if (!data.name || !data.price || !data.image) {
+        showToast('নাম, দাম ও ছবির URL অবশ্যই দিন', true);
+        return;
+    }
+
+    var cb = 'saveCB_' + Date.now();
+    var params = [];
+    for (var k in data) {
+        if (data.hasOwnProperty(k)) {
+            params.push(encodeURIComponent(k) + '=' + encodeURIComponent(data[k]));
+        }
+    }
+    var url = API_URL + '?' + params.join('&');
+
+    document.getElementById('saveBtn').textContent = 'সেভ হচ্ছে...';
+    document.getElementById('saveBtn').disabled = true;
+
+    jsonp(url, cb, function(result) {
+        document.getElementById('saveBtn').textContent = id ? 'আপডেট করুন' : 'সেভ করুন';
+        document.getElementById('saveBtn').disabled = false;
+        if (result.success) {
+            closeModal();
+            showToast(id ? 'প্রোডাক্ট আপডেট হয়েছে' : 'নতুন প্রোডাক্ট যোগ হয়েছে');
+            loadProducts();
+        } else {
+            showToast(result.message || 'সেভ করতে সমস্যা', true);
+        }
+    });
+}
+
+function openDeleteModal(id, name) {
+    document.getElementById('deleteId').value = id;
+    document.getElementById('deleteName').textContent = 'প্রোডাক্ট: ' + name;
+    document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+}
+
+function confirmDelete() {
+    var id = document.getElementById('deleteId').value;
+    var pass = localStorage.getItem('mrinmoyee_admin_pass');
+    var cb = 'delCB_' + Date.now();
+    jsonp(API_URL + '?action=deleteProduct&id=' + encodeURIComponent(id) + '&password=' + encodeURIComponent(pass), cb, function(result) {
+        if (result.success) {
+            closeDeleteModal();
+            showToast('প্রোডাক্ট ডিলিট হয়েছে');
+            loadProducts();
+        } else {
+            showToast(result.message || 'ডিলিট করতে সমস্যা', true);
+        }
+    });
+}
+
+function showToast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isError ? ' error' : '') + ' show';
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+// Auto-login if password saved
+var savedPass = localStorage.getItem('mrinmoyee_admin_pass');
+if (savedPass) {
+    document.getElementById('passwordInput').value = savedPass;
+    login();
+}
+</script>
+</body>
+</html>
