@@ -81,25 +81,19 @@ ul { list-style: none; }
 .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
     position: relative;
 }
-.logo-icon {
-    display: flex;
-    align-items: center;
+.logo-img {
+    height: 52px;
+    width: auto;
+    border-radius: 8px;
     animation: logoGlow 3s ease-in-out infinite;
+    transition: transform 0.3s;
 }
+.logo-img:hover { transform: scale(1.05); }
 @keyframes logoGlow {
     0%, 100% { filter: drop-shadow(0 0 4px rgba(212, 168, 83, 0.3)); }
     50% { filter: drop-shadow(0 0 12px rgba(212, 168, 83, 0.6)); }
-}
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #d4a853, #f1c40f, #d4a853);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 .nav-links { display: flex; gap: 2rem; }
 .nav-links a {
@@ -198,7 +192,7 @@ ul { list-style: none; }
     color: #d4a853;
 }
 
-/* ========== 3D Bangle Scene ========== */
+/* ========== Hero Visual ========== */
 .hero-visual {
     position: relative;
     height: 500px;
@@ -207,46 +201,56 @@ ul { list-style: none; }
     justify-content: center;
     perspective: 1200px;
 }
-.bangle-3d-scene {
+.hero-image-frame {
     position: relative;
-    width: 320px;
-    height: 320px;
-    transform-style: preserve-3d;
-    animation: bangleFloat 8s ease-in-out infinite;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    overflow: hidden;
+    animation: heroFloat 8s ease-in-out infinite;
+    box-shadow: 0 0 60px rgba(212, 168, 83, 0.15), 0 0 120px rgba(192, 57, 43, 0.1);
+    border: 3px solid rgba(212, 168, 83, 0.3);
 }
-@keyframes bangleFloat {
-    0%, 100% { transform: rotateX(5deg) rotateY(0deg) translateY(0); }
-    25% { transform: rotateX(8deg) rotateY(10deg) translateY(-10px); }
-    50% { transform: rotateX(3deg) rotateY(5deg) translateY(0); }
-    75% { transform: rotateX(10deg) rotateY(-5deg) translateY(-15px); }
+@keyframes heroFloat {
+    0%, 100% { transform: rotateY(0deg) translateY(0); }
+    25% { transform: rotateY(5deg) translateY(-8px); }
+    50% { transform: rotateY(0deg) translateY(0); }
+    75% { transform: rotateY(-5deg) translateY(-12px); }
 }
-.bangle-3d {
+.hero-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.hero-image-overlay {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform-style: preserve-3d;
-    backface-visibility: visible;
+    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(13, 10, 8, 0.4) 100%);
+    pointer-events: none;
 }
-.bangle-3d-outer {
-    animation: bangleSpin 20s linear infinite;
-    transform: rotateY(0deg) translateZ(30px);
+.hero-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 168, 83, 0.2);
+    animation: ringPulse 4s ease-in-out infinite;
+    pointer-events: none;
 }
-.bangle-3d-mid {
-    animation: bangleSpin 15s linear infinite reverse;
-    transform: rotateY(45deg) translateZ(10px) scale(0.85);
+.ring-1 {
+    inset: -20px;
+    border-width: 3px;
+    animation-delay: 0s;
 }
-.bangle-3d-inner {
-    animation: bangleSpin 12s linear infinite;
-    transform: rotateY(-30deg) translateZ(-10px) scale(0.7);
+.ring-2 {
+    inset: -40px;
+    border-width: 1px;
+    border-color: rgba(192, 57, 43, 0.15);
+    animation-delay: -2s;
 }
-@keyframes bangleSpin {
-    0% { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
+@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 1; }
 }
-.bangle-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 30px rgba(212, 168, 83, 0.2)); }
-
 /* Sparkles */
 .bangle-sparkle {
     position: absolute;
@@ -255,11 +259,12 @@ ul { list-style: none; }
     background: #f1c40f;
     box-shadow: 0 0 10px #f1c40f, 0 0 20px rgba(241, 196, 15, 0.5);
     animation: sparkle 2s ease-in-out infinite;
+    z-index: 2;
 }
-.s1 { top: 10%; left: 20%; animation-delay: 0s; }
-.s2 { top: 60%; right: 15%; animation-delay: 0.5s; }
-.s3 { bottom: 15%; left: 30%; animation-delay: 1s; }
-.s4 { top: 30%; right: 25%; animation-delay: 1.5s; }
+.s1 { top: 5%; left: 15%; animation-delay: 0s; }
+.s2 { top: 55%; right: 5%; animation-delay: 0.5s; }
+.s3 { bottom: 10%; left: 25%; animation-delay: 1s; }
+.s4 { top: 25%; right: 10%; animation-delay: 1.5s; }
 @keyframes sparkle {
     0%, 100% { opacity: 0; transform: scale(0); }
     50% { opacity: 1; transform: scale(1.5); }
@@ -413,7 +418,14 @@ ul { list-style: none; }
     position: relative;
     overflow: hidden;
 }
-.product-img .bangle-card-svg { width: 80%; height: 80%; }
+.product-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s;
+}
+.product-card:hover .product-photo { transform: scale(1.08); }
 .product-tag {
     position: absolute;
     top: 12px;
@@ -494,29 +506,36 @@ ul { list-style: none; }
 }
 .about-visual {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
     justify-content: center;
+    align-items: center;
     perspective: 800px;
 }
-.about-bangle-display {
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, rgba(26,21,18,0.8), transparent);
+.about-image-frame {
+    position: relative;
+    width: 320px;
+    height: 320px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: aboutBangle 6s ease-in-out infinite;
-    transform-style: preserve-3d;
+    overflow: hidden;
+    animation: aboutImageFloat 6s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(212, 168, 83, 0.1), 0 0 80px rgba(192, 57, 43, 0.08);
+    border: 2px solid rgba(212, 168, 83, 0.2);
 }
-.about-bangle-display:nth-child(2) { animation-delay: -2s; }
-.about-bangle-display:nth-child(3) { animation-delay: -4s; }
-@keyframes aboutBangle {
+@keyframes aboutImageFloat {
     0%, 100% { transform: rotateY(0deg) translateY(0); }
-    50% { transform: rotateY(30deg) translateY(-10px); }
+    50% { transform: rotateY(15deg) translateY(-8px); }
 }
-.about-bangle-svg { width: 100%; height: 100%; }
+.about-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.about-image-decoration {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(13, 10, 8, 0.3) 100%);
+    pointer-events: none;
+}
 .about-text h2 { font-size: 2rem; margin-bottom: 1rem; }
 .about-text h2 span { color: #c0392b; }
 .about-text p { margin-bottom: 1rem; color: #a0897a; }
@@ -900,7 +919,7 @@ ul { list-style: none; }
     .hero-desc { margin-left: auto; margin-right: auto; }
     .hero-badges { justify-content: center; }
     .hero-visual { height: 320px; }
-    .bangle-3d-scene { width: 240px; height: 240px; }
+    .hero-image-frame { width: 260px; height: 260px; }
     .about-grid {
         grid-template-columns: 1fr;
         text-align: center;
@@ -920,5 +939,5 @@ ul { list-style: none; }
     .hero-text h1 { font-size: 1.8rem; }
     .section-title { font-size: 1.5rem; }
     .hero-visual { height: 260px; }
-    .bangle-3d-scene { width: 200px; height: 200px; }
+    .hero-image-frame { width: 200px; height: 200px; }
 }

@@ -43,20 +43,7 @@
     <nav class="navbar" id="navbar">
         <div class="container nav-inner">
             <a href="#" class="logo">
-                <span class="logo-icon">
-                    <svg viewBox="0 0 60 60" width="44" height="44">
-                        <circle cx="30" cy="30" r="26" fill="none" stroke="#c0392b" stroke-width="3" opacity="0.6"/>
-                        <circle cx="30" cy="30" r="20" fill="none" stroke="#d4a853" stroke-width="2.5" opacity="0.8"/>
-                        <circle cx="30" cy="30" r="14" fill="none" stroke="#c0392b" stroke-width="2"/>
-                        <circle cx="30" cy="30" r="8" fill="#d4a853" opacity="0.3"/>
-                        <circle cx="30" cy="30" r="3" fill="#c0392b"/>
-                        <circle cx="30" cy="3" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-                        <circle cx="30" cy="57" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-                        <circle cx="3" cy="30" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-                        <circle cx="57" cy="30" r="2.5" fill="#f1c40f"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-                    </svg>
-                </span>
-                <span class="logo-text">মৃন্ময়ী</span>
+                <img src="images/logo.jpg" alt="মৃন্ময়ী" class="logo-img" />
             </a>
             <button class="hamburger" id="hamburger" aria-label="মেনু">
                 <span></span><span></span><span></span>
@@ -87,53 +74,15 @@
                 <a href="#products" class="btn btn-primary">প্রোডাক্ট দেখুন</a>
             </div>
             <div class="hero-visual">
-                <div class="bangle-3d-scene" id="bangleScene">
-                    <div class="bangle-3d bangle-3d-outer">
-                        <svg viewBox="0 0 200 200" class="bangle-svg">
-                            <defs>
-                                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#f1c40f"/>
-                                    <stop offset="50%" stop-color="#d4a853"/>
-                                    <stop offset="100%" stop-color="#f1c40f"/>
-                                </linearGradient>
-                                <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#e74c3c"/>
-                                    <stop offset="50%" stop-color="#c0392b"/>
-                                    <stop offset="100%" stop-color="#e74c3c"/>
-                                </linearGradient>
-                            </defs>
-                            <circle cx="100" cy="100" r="88" fill="none" stroke="url(#goldGrad)" stroke-width="10" opacity="0.6"/>
-                            <circle cx="100" cy="100" r="76" fill="none" stroke="url(#rubyGrad)" stroke-width="8" opacity="0.5"/>
-                            <circle cx="100" cy="100" r="64" fill="none" stroke="#d4a853" stroke-width="6" opacity="0.7"/>
-                            <circle cx="100" cy="100" r="52" fill="none" stroke="#c0392b" stroke-width="5" opacity="0.4"/>
-                        </svg>
-                    </div>
-                    <div class="bangle-3d bangle-3d-mid">
-                        <svg viewBox="0 0 200 200" class="bangle-svg">
-                            <defs>
-                                <linearGradient id="emGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#2ecc71"/>
-                                    <stop offset="50%" stop-color="#27ae60"/>
-                                    <stop offset="100%" stop-color="#2ecc71"/>
-                                </linearGradient>
-                            </defs>
-                            <circle cx="100" cy="100" r="82" fill="none" stroke="url(#emGrad)" stroke-width="9" opacity="0.5"/>
-                            <circle cx="100" cy="100" r="70" fill="none" stroke="#f1c40f" stroke-width="7" opacity="0.6"/>
-                            <circle cx="100" cy="100" r="58" fill="none" stroke="url(#rubyGrad)" stroke-width="5" opacity="0.4"/>
-                        </svg>
-                    </div>
-                    <div class="bangle-3d bangle-3d-inner">
-                        <svg viewBox="0 0 200 200" class="bangle-svg">
-                            <circle cx="100" cy="100" r="78" fill="none" stroke="#d4a853" stroke-width="10" opacity="0.7"/>
-                            <circle cx="100" cy="100" r="66" fill="none" stroke="#c0392b" stroke-width="8" opacity="0.5"/>
-                            <circle cx="100" cy="100" r="54" fill="none" stroke="#f1c40f" stroke-width="6" opacity="0.6"/>
-                            <circle cx="100" cy="100" r="42" fill="none" stroke="#8e44ad" stroke-width="5" opacity="0.4"/>
-                        </svg>
-                    </div>
+                <div class="hero-image-frame" id="bangleScene">
+                    <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80" alt="বালা" class="hero-main-image" loading="lazy" />
+                    <div class="hero-image-overlay"></div>
                     <div class="bangle-sparkle s1"></div>
                     <div class="bangle-sparkle s2"></div>
                     <div class="bangle-sparkle s3"></div>
                     <div class="bangle-sparkle s4"></div>
+                    <div class="hero-ring ring-1"></div>
+                    <div class="hero-ring ring-2"></div>
                 </div>
             </div>
         </div>
@@ -164,26 +113,9 @@
     <section class="about" id="about">
         <div class="container about-grid">
             <div class="about-visual">
-                <div class="about-bangle-display">
-                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
-                        <circle cx="60" cy="60" r="50" fill="none" stroke="#c0392b" stroke-width="5" opacity="0.6"/>
-                        <circle cx="60" cy="60" r="40" fill="none" stroke="#d4a853" stroke-width="4" opacity="0.8"/>
-                        <circle cx="60" cy="60" r="30" fill="none" stroke="#c0392b" stroke-width="3"/>
-                    </svg>
-                </div>
-                <div class="about-bangle-display">
-                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
-                        <circle cx="60" cy="60" r="48" fill="none" stroke="#27ae60" stroke-width="5" opacity="0.5"/>
-                        <circle cx="60" cy="60" r="38" fill="none" stroke="#f1c40f" stroke-width="4" opacity="0.7"/>
-                        <circle cx="60" cy="60" r="28" fill="none" stroke="#8e44ad" stroke-width="3" opacity="0.5"/>
-                    </svg>
-                </div>
-                <div class="about-bangle-display">
-                    <svg viewBox="0 0 120 120" class="about-bangle-svg">
-                        <circle cx="60" cy="60" r="46" fill="none" stroke="#2980b9" stroke-width="5" opacity="0.5"/>
-                        <circle cx="60" cy="60" r="36" fill="none" stroke="#c0392b" stroke-width="4" opacity="0.6"/>
-                        <circle cx="60" cy="60" r="26" fill="none" stroke="#f1c40f" stroke-width="3" opacity="0.8"/>
-                    </svg>
+                <div class="about-image-frame">
+                    <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500&q=80" alt="বালা" class="about-image" loading="lazy" />
+                    <div class="about-image-decoration"></div>
                 </div>
             </div>
             <div class="about-text">
