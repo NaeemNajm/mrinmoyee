@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>অ্যাডমিন — মৃন্ময়ী</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <style>
         :root {
             --bg: #0d0a08;
@@ -51,6 +51,7 @@
         .login-loading.show { display: block; }
         .btn-login { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-family: inherit; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, var(--ruby), var(--gold)); color: #fff; transition: all 0.3s; }
         .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,57,43,0.4); }
+        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
         /* ===== MAIN ===== */
         .main-screen { display: none; }
@@ -200,7 +201,7 @@
         <p class="login-sub">প্রোডাক্ট ম্যানেজমেন্ট প্যানেল</p>
         <div class="input-wrap">
             <span class="input-icon">🔒</span>
-            <input type="password" id="passwordInput" placeholder="অ্যাডমিন পাসওয়ার্ড" onkeydown="if(event.key==='Enter') login()" />
+            <input type="password" id="passwordInput" placeholder="অ্যাডমিন পাসওয়ার্ড" autocomplete="off" onkeydown="if(event.key==='Enter') login()" />
         </div>
         <div class="login-error" id="loginError">ভুল পাসওয়ার্ড</div>
         <div class="login-loading" id="loginLoading">ভেরিফাই করা হচ্ছে...</div>
@@ -349,7 +350,7 @@
         </div>
         <div class="form-group">
             <label>ছবির URL *</label>
-            <input type="text" id="pImage" placeholder="images/ফাইল.jpg অথবা https://..." oninput="updateImagePreview()" />
+            <input type="url" id="pImage" placeholder="images/ফাইল.jpg অথবা https://..." oninput="updateImagePreview()" />
             <div class="image-preview" id="imagePreview"><img id="previewImg" src="" alt="preview" /></div>
         </div>
         <div class="modal-actions">
@@ -377,47 +378,71 @@
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg"></span></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbx_mSFby4uET0ACqFEdVvw1u954wOQj4kkb-bBLTsKxGAxZcxYcHjae21Y_AVD1EjmvEA/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycby9DN7ozaee-W51bySAIi37axP-0TWIt-3tRxLTpgBozDWcPkFE3ts9GMGzPrWdCPj_8w/exec';
 var products = [];
 var currentCat = 'all';
+var loginAttempts = 0;
+var loginBlockedUntil = 0;
 
-function jsonp(url, callbackName, callback) {
-    window[callbackName] = function(data) {
-        delete window[callbackName];
-        var s = document.getElementById('_jp_' + callbackName);
-        if (s) s.remove();
-        callback(data);
-    };
-    var s = document.createElement('script');
-    s.id = '_jp_' + callbackName;
-    var sep = url.indexOf('?') > -1 ? '&' : '?';
-    s.src = url + sep + 'callback=' + callbackName;
-    s.onerror = function() { delete window[callbackName]; callback({error: 'Network error'}); };
-    document.body.appendChild(s);
+function esc(t) {
+    if (!t) return '';
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function apiFetch(action, data, callback) {
+    var token = sessionStorage.getItem('mrinmoyee_admin_token') || '';
+    var body = new URLSearchParams();
+    body.append('action', action);
+    body.append('token', token);
+    if (data) {
+        for (var k in data) {
+            if (data.hasOwnProperty(k)) body.append(k, data[k]);
+        }
+    }
+    fetch(API_URL, { method: 'POST', body: body })
+        .then(function(r) { return r.json(); })
+        .then(function(j) { callback(j); })
+        .catch(function() { callback({error: 'নেটওয়ার্ক সমস্যা'}); });
 }
 
 function login() {
+    var now = Date.now();
+    if (now < loginBlockedUntil) {
+        var wait = Math.ceil((loginBlockedUntil - now) / 1000);
+        document.getElementById('loginError').textContent = 'অনুগ্রহ করে ' + wait + ' সেকেন্ড পরে চেষ্টা করুন';
+        document.getElementById('loginError').classList.add('show');
+        return;
+    }
     var pass = document.getElementById('passwordInput').value;
     if (!pass) return;
     document.getElementById('loginError').classList.remove('show');
     document.getElementById('loginLoading').classList.add('show');
-    var cb = 'authCB_' + Date.now();
-    jsonp(API_URL + '?action=auth&password=' + encodeURIComponent(pass), cb, function(data) {
+    document.querySelector('.btn-login').disabled = true;
+
+    apiFetch('auth', { password: pass }, function(data) {
         document.getElementById('loginLoading').classList.remove('show');
-        if (data.valid) {
-            localStorage.setItem('mrinmoyee_admin_pass', pass);
+        document.querySelector('.btn-login').disabled = false;
+        if (data.success && data.token) {
+            sessionStorage.setItem('mrinmoyee_admin_token', data.token);
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'block';
             loadProducts();
         } else {
-            document.getElementById('loginError').textContent = data.message || 'ভুল পাসওয়ার্ড';
+            loginAttempts++;
+            if (loginAttempts >= 3) {
+                loginBlockedUntil = now + 30000;
+                document.getElementById('loginError').textContent = 'অনেকবার ভুল। ৩০ সেকেন্ড পর চেষ্টা করুন।';
+                loginAttempts = 0;
+            } else {
+                document.getElementById('loginError').textContent = data.message || 'ভুল পাসওয়ার্ড';
+            }
             document.getElementById('loginError').classList.add('show');
         }
     });
 }
 
 function logout() {
-    localStorage.removeItem('mrinmoyee_admin_pass');
+    sessionStorage.removeItem('mrinmoyee_admin_token');
     document.getElementById('mainScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('passwordInput').value = '';
@@ -425,9 +450,7 @@ function logout() {
 
 function loadProducts() {
     document.getElementById('lastUpdated').textContent = 'লোড হচ্ছে...';
-    var pass = localStorage.getItem('mrinmoyee_admin_pass');
-    var cb = 'prodCB_' + Date.now();
-    jsonp(API_URL + '?action=getProducts&password=' + encodeURIComponent(pass), cb, function(data) {
+    apiFetch('getProducts', {}, function(data) {
         if (data.error) { showToast('ডেটা লোড করতে সমস্যা: ' + data.error, true); return; }
         products = (data.products && Array.isArray(data.products)) ? data.products : [];
         renderGrid();
@@ -498,7 +521,6 @@ function filterGrid() {
     renderGrid();
 }
 
-// Category chips
 document.addEventListener('click', function(e) {
     var chip = e.target.closest('.chip');
     if (!chip) return;
@@ -507,11 +529,6 @@ document.addEventListener('click', function(e) {
     currentCat = chip.dataset.cat;
     renderGrid();
 });
-
-function esc(t) {
-    if (!t) return '';
-    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
 
 function updateColorPreview() {
     var c = document.getElementById('pColor').value || '#d4a853';
@@ -577,8 +594,6 @@ function closeModal() {
 function saveProduct() {
     var id = document.getElementById('editId').value;
     var data = {
-        action: 'saveProduct',
-        password: localStorage.getItem('mrinmoyee_admin_pass'),
         id: id || '',
         name: document.getElementById('pName').value.trim(),
         desc: document.getElementById('pDesc').value.trim(),
@@ -595,13 +610,9 @@ function saveProduct() {
         showToast('নাম, দাম ও ছবির URL অবশ্যই দিন', true);
         return;
     }
-    var cb = 'saveCB_' + Date.now();
-    var params = [];
-    for (var k in data) { if (data.hasOwnProperty(k)) params.push(encodeURIComponent(k) + '=' + encodeURIComponent(data[k])); }
-    var url = API_URL + '?' + params.join('&');
     document.getElementById('saveBtn').textContent = 'সেভ হচ্ছে...';
     document.getElementById('saveBtn').disabled = true;
-    jsonp(url, cb, function(result) {
+    apiFetch('saveProduct', data, function(result) {
         document.getElementById('saveBtn').textContent = id ? 'আপডেট করুন' : 'সেভ করুন';
         document.getElementById('saveBtn').disabled = false;
         if (result.success) {
@@ -626,9 +637,12 @@ function closeDeleteModal() {
 
 function confirmDelete() {
     var id = document.getElementById('deleteId').value;
-    var pass = localStorage.getItem('mrinmoyee_admin_pass');
-    var cb = 'delCB_' + Date.now();
-    jsonp(API_URL + '?action=deleteProduct&id=' + encodeURIComponent(id) + '&password=' + encodeURIComponent(pass), cb, function(result) {
+    var btn = document.querySelector('#deleteModal .btn-danger');
+    btn.textContent = 'ডিলিট হচ্ছে...';
+    btn.disabled = true;
+    apiFetch('deleteProduct', { id: id }, function(result) {
+        btn.textContent = 'ডিলিট করুন';
+        btn.disabled = false;
         if (result.success) { closeDeleteModal(); showToast('🗑️ প্রোডাক্ট ডিলিট হয়েছে'); loadProducts(); }
         else { showToast('❌ ' + (result.message || 'ডিলিট করতে সমস্যা'), true); }
     });
@@ -641,8 +655,12 @@ function showToast(msg, isError) {
     setTimeout(function() { document.getElementById('toast').classList.remove('show'); }, 3500);
 }
 
-var savedPass = localStorage.getItem('mrinmoyee_admin_pass');
-if (savedPass) { document.getElementById('passwordInput').value = savedPass; login(); }
+var savedToken = sessionStorage.getItem('mrinmoyee_admin_token');
+if (savedToken) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    loadProducts();
+}
 </script>
 </body>
 </html>

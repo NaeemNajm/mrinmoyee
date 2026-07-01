@@ -6,7 +6,7 @@
     <title>মৃন্ময়ী - Mrinmoyee | হাতের চুড়ির সৌন্দর্য</title>
     <meta name="description" content="মৃন্ময়ী - প্রেমের ছোঁয়ায় বোনা হাতের চুড়ি। কুন্দন ডিজাইনের হাতের চুড়ি সেট কিনুন ৩০০-১০০০ টাকায়।" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="style.css" />
     <script>
     !function(f,b,e,v,n,t,s)
@@ -136,7 +136,7 @@
         <div class="container">
             <h2 class="section-title">অর্ডার <span>করুন</span></h2>
             <p class="section-sub">নিচের ফর্ম পূরণ করলে আমরা ২৪ ঘণ্টার মধ্যে যোগাযোগ করব</p>
-            <form class="order-form" id="orderForm" action="https://script.google.com/macros/s/AKfycbx_mSFby4uET0ACqFEdVvw1u954wOQj4kkb-bBLTsKxGAxZcxYcHjae21Y_AVD1EjmvEA/exec" method="GET">
+            <form class="order-form" id="orderForm" action="https://script.google.com/macros/s/AKfycby9DN7ozaee-W51bySAIi37axP-0TWIt-3tRxLTpgBozDWcPkFE3ts9GMGzPrWdCPj_8w/exec" method="POST">
                 <div class="form-row">
                     <div class="form-group">
                         <label>আপনার নাম *</label>
@@ -209,7 +209,6 @@
                         <input type="hidden" name="delivery_charge" id="deliveryChargeInput" value="0" />
                     </div>
                 </div>
-                <input type="hidden" name="discount" id="discountInput" value="0" />
                 <div class="total-box" id="totalBox">
                     <span>মোট payable: </span>
                     <strong id="totalAmount">৳০</strong>

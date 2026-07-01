@@ -1,10 +1,31 @@
 /* ========== Reset & Base ========== */
+:root {
+    --bg-primary: #0d0a08;
+    --bg-secondary: #1a1512;
+    --bg-card: #15100c;
+    --text-primary: #f5ede6;
+    --text-muted: #a0897a;
+    --text-dim: #7f6b5e;
+    --text-dark: #5a4a3d;
+    --gold: #d4a853;
+    --gold-light: #f1c40f;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --green: #27ae60;
+    --green-light: #2ecc71;
+    --blue: #2980b9;
+    --purple: #8e44ad;
+    --border-gold: rgba(212, 168, 83, 0.2);
+    --border-glow: rgba(212, 168, 83, 0.3);
+    --shadow-red: rgba(192, 57, 43, 0.3);
+    --shadow-gold: rgba(212, 168, 83, 0.15);
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
     font-family: 'Noto Serif Bengali', 'Inter', sans-serif;
-    background: #0d0a08;
-    color: #f5ede6;
+    background: var(--bg-primary);
+    color: var(--text-primary);
     line-height: 1.7;
     overflow-x: hidden;
 }
@@ -70,7 +91,7 @@ ul { list-style: none; }
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 1000;
-    border-bottom: 1px solid rgba(212, 168, 83, 0.15);
+    border-bottom: 1px solid var(--border-gold);
 }
 .nav-inner {
     display: flex;
@@ -151,12 +172,12 @@ ul { list-style: none; }
 }
 .hero-tagline {
     font-size: 1rem;
-    color: #d4a853;
+    color: var(--gold);
     letter-spacing: 3px;
     text-transform: uppercase;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 20px rgba(212, 168, 83, 0.3);
+    text-shadow: 0 0 20px var(--shadow-gold);
 }
 .hero-text h1 {
     font-size: 3rem;
@@ -558,7 +579,7 @@ ul { list-style: none; }
 /* ========== Order Form ========== */
 .order-section {
     padding: 5rem 0;
-    background: #0d0a08;
+    background: var(--bg-primary);
     position: relative;
 }
 .order-section::before {
@@ -770,7 +791,7 @@ ul { list-style: none; }
 /* ========== Contact ========== */
 .contact {
     padding: 5rem 0;
-    background: #0d0a08;
+    background: var(--bg-primary);
     position: relative;
 }
 .contact::before {
