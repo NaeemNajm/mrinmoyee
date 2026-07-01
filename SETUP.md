@@ -37,8 +37,8 @@
 
 ```javascript
 // ========================================
-// মৃন্ময়ী - Mrinmoyee অর্ডার ম্যানেজমেন্ট v4
-// ইংরেজি ফাংশন নাম (web app এরর এড়াতে)
+// মৃন্ময়ী - Mrinmoyee v5 (অর্ডার + প্রোডাক্ট)
+// সম্পূর্ণ ইন্টিগ্রেটেড — WhatsApp ইমোজি ফিক্স সহ
 // ========================================
 
 var HEADERS = ['সময়', 'নাম', 'মোবাইল', 'হোয়াটসঅ্যাপ', 'ঠিকানা', 'ডেলিভারি এরিয়া', 'ডেলিভারি চার্জ', 'পেমেন্ট', 'প্রোডাক্ট', 'সাইজ', 'পরিমাণ', 'মূল্য', 'নোট', 'নেট টোটাল', 'স্ট্যাটাস', 'WhatsApp লিংক', 'অর্ডার নং'];
@@ -47,6 +47,11 @@ var ORDER_SHEET = '📦 অর্ডার';
 var STATUS_LIST = ['⏳ পেন্ডিং', '🔧 প্রসেসিং', '📦 শিপড', '✅ ডেলিভারড', '❌ বাতিল'];
 var STATUS_COL = 15;
 var WHATSAPP_COL = 16;
+
+// Product Management
+var PRODUCT_SHEET = '📦 প্রোডাক্ট';
+var PRODUCT_HEADERS = ['id', 'name', 'description', 'price', 'color', 'colorName', 'category', 'sizes', 'tag', 'image', 'active'];
+var ADMIN_PASSWORD = 'mrinmoyee@2024';
 
 /* ===== Custom Menu ===== */
 function onOpen() {
@@ -59,18 +64,32 @@ function onOpen() {
     .addItem('🔄 সব দেখান', 'filterAll')
     .addSeparator()
     .addItem('📊 ড্যাশবোর্ড রিফ্রেশ', 'refreshDashboard')
+    .addSeparator()
+    .addItem('📲 WhatsApp লিংক রিজেনারেট', 'regenerateWhatsAppLinks')
     .addToUi();
 }
 
 /* ===== Web App Handler ===== */
 function doGet(e) {
-  if (e && e.parameter && e.parameter.action === 'track') {
-    return handleTrackRequest(e);
+  if (e && e.parameter) {
+    if (e.parameter.action === 'track') return handleTrackRequest(e);
+    if (e.parameter.action === 'getProducts') return handleGetProducts(e);
+    if (e.parameter.action === 'saveProduct') return handleSaveProduct(e);
+    if (e.parameter.action === 'deleteProduct') return handleDeleteProduct(e);
+    if (e.parameter.action === 'auth') return handleAuth(e);
   }
   return handleRequest(e);
 }
-function doPost(e) { return handleRequest(e); }
 
+function doPost(e) {
+  if (e && e.parameter) {
+    if (e.parameter.action === 'saveProduct') return handleSaveProduct(e);
+    if (e.parameter.action === 'deleteProduct') return handleDeleteProduct(e);
+  }
+  return handleRequest(e);
+}
+
+/* ===== Order Handler ===== */
 function handleRequest(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ensureSheets(ss);
@@ -121,7 +140,7 @@ function handleRequest(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/* ===== Track Order (JSONP-ready) ===== */
+/* ===== Track Order ===== */
 function handleTrackRequest(e) {
   var orderId = e.parameter.order_id;
   var callback = e.parameter.callback || '';
@@ -186,7 +205,7 @@ function createJsonOutput(data, callback) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/* ===== Status Dropdown with Colors ===== */
+/* ===== Status Dropdown ===== */
 function setStatusDropdown(sheet, row) {
   var range = sheet.getRange(row, STATUS_COL);
   var rule = SpreadsheetApp.newDataValidation()
@@ -246,43 +265,80 @@ function setupTrigger() {
       .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
       .onEdit()
       .create();
-    SpreadsheetApp.getUi().alert('✅ onEdit ট্রিগার সেটআপ হয়েছে!');
+    SpreadsheetApp.getUi().alert('onEdit ট্রিগার সেটআপ হয়েছে!');
   } else {
-    SpreadsheetApp.getUi().alert('ℹ️ ট্রিগার আগেই সেটআপ করা আছে।');
+    SpreadsheetApp.getUi().alert('ট্রিগার আগেই সেটআপ করা আছে।');
   }
 }
 
-/* ===== WhatsApp One-Click Link ===== */
+/* ===== WhatsApp Link (v5 — encodeURIComponent) ===== */
 function setWhatsAppLink(sheet, row) {
   if (row <= 1) return;
-  var colB = 'B' + row;
-  var colD = 'D' + row;
-  var colE = 'E' + row;
-  var colF = 'F' + row;
-  var colH = 'H' + row;
-  var colI = 'I' + row;
-  var colJ = 'J' + row;
-  var colK = 'K' + row;
-  var colN = 'N' + row;
-  var colQ = 'Q' + row;
 
-  var formula = '=HYPERLINK("https://wa.me/880"&IF(LEFT(' + colD + ',1)="0",MID(' + colD + ',2,99),' + colD + ')&"?text="&ENCODEURL(' +
-    '"প্রিয় "&' + colB + '&CHAR(10)&' +
-    '"মৃন্ময়ী - Mrinmoyee"&CHAR(10)&' +
-    '"📋 অর্ডার: "&' + colQ + '&CHAR(10)&CHAR(10)&' +
-    '"ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?"&CHAR(10)&CHAR(10)&' +
-    '"📋 অর্ডার বিস্তারিত:"&CHAR(10)&' +
-    '"🆔 অর্ডার: "&' + colQ + '&CHAR(10)&' +
-    '"🛒 পণ্য: "&' + colI + '&" — "&' + colJ + '&" (x"&' + colK + '&")"&CHAR(10)&' +
-    '"💰 মোট বিল: ৳"&' + colN + '&CHAR(10)&' +
-    '"🚚 ডেলিভারি: "&' + colF + '&CHAR(10)&' +
-    '"📍 ঠিকানা: "&' + colE + '&CHAR(10)&' +
-    '"💳 পেমেন্ট: "&' + colH + '&CHAR(10)&CHAR(10)&' +
-    '"ঠিকানা ও ডিজাইন ঠিক আছে? কনফার্ম করলে প্রসেসিং শুরু করব।"&CHAR(10)&' +
-    '"ধন্যবাদ! 💛"' +
-    '), "📲 WhatsApp")';
+  var data = sheet.getRange(row, 1, 1, HEADERS.length).getValues()[0];
+  var name = String(data[1] || '');
+  var whatsapp = String(data[3] || '').replace(/[^0-9]/g, '');
+  var address = String(data[4] || '');
+  var area = String(data[5] || '');
+  var payment = String(data[7] || '');
+  var product = String(data[8] || '');
+  var size = String(data[9] || '');
+  var qty = String(data[10] || '1');
+  var total = String(data[13] || '0');
+  var orderId = String(data[16] || '');
 
-  sheet.getRange(row, WHATSAPP_COL).setFormula(formula);
+  var phone = whatsapp;
+  if (phone.length === 11 && phone.charAt(0) === '0') phone = phone.substring(1);
+  else if (phone.length === 14 && phone.indexOf('880') === 0) phone = phone.substring(3);
+  else if (phone.length === 13 && phone.indexOf('88') === 0) phone = phone.substring(2);
+  phone = phone.replace(/[^0-9]/g, '');
+
+  if (phone.length < 9) {
+    sheet.getRange(row, WHATSAPP_COL).setValue('Invalid Number');
+    return;
+  }
+
+  var message = 'প্রিয় ' + name + '\n' +
+    'মৃন্ময়ী - Mrinmoyee\n' +
+    'অর্ডার: ' + orderId + '\n\n' +
+    'ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?\n\n' +
+    'অর্ডার বিস্তারিত:\n' +
+    'অর্ডার: ' + orderId + '\n' +
+    'পণ্য: ' + product + ' - ' + size + ' (x' + qty + ')\n' +
+    'মোট বিল: ৳' + total + '\n' +
+    'ডেলিভারি: ' + area + '\n' +
+    'ঠিকানা: ' + address + '\n' +
+    'পেমেন্ট: ' + payment + '\n\n' +
+    '---- আপনার মতামত দিন ----\n' +
+    'গিফট র‍্যাপিং দরকার? (হ্যাঁ/না): \n' +
+    'কোনো বিশেষ নোট থাকলে লিখুন: \n' +
+    'স্পেশাল প্যাকেজিং দরকার? (হ্যাঁ/না): \n' +
+    '------------------------\n\n' +
+    'ঠিকানা ও ডিজাইন ঠিক আছে? কনফার্ম করলে প্রসেসিং শুরু করব।\n' +
+    'ধন্যবাদ!';
+
+  var url = 'https://wa.me/880' + phone + '?text=' + encodeURIComponent(message);
+
+  var richValue = SpreadsheetApp.newRichTextValue()
+    .setText('Open WhatsApp')
+    .setLinkUrl(url)
+    .build();
+
+  sheet.getRange(row, WHATSAPP_COL).setRichTextValue(richValue);
+}
+
+/* ===== Regenerate All WhatsApp Links ===== */
+function regenerateWhatsAppLinks() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ORDER_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) {
+    SpreadsheetApp.getUi().alert('কোনো অর্ডার পাওয়া যায়নি।');
+    return;
+  }
+  var lastRow = sheet.getLastRow();
+  for (var i = 2; i <= lastRow; i++) {
+    setWhatsAppLink(sheet, i);
+  }
+  SpreadsheetApp.getUi().alert('WhatsApp লিংক রিজেনারেট করা হয়েছে!');
 }
 
 /* ===== Filter by Status ===== */
@@ -359,7 +415,6 @@ function buildDashboard(dash, orderSheet) {
   }
   var n = rows.length;
 
-  // ── Title ──
   mergeAndStyle(dash, 'A1', 'F1', '📊 মৃন্ময়ী - Mrinmoyee ড্যাশবোর্ড', 18, '#c0392b', '#fdf8f4', true, 40);
 
   var today = new Date(); today.setHours(0,0,0,0);
@@ -391,7 +446,6 @@ function buildDashboard(dash, orderSheet) {
   var daysElapsed = Math.max(1, Math.round((today.getTime()-firstDate.getTime())/86400000)+1);
   var avgDaily = (n/daysElapsed).toFixed(1);
 
-  // ── KPI Cards (Row 3-5, no merge — values separate) ──
   var cards = [
     ['📦 মোট অর্ডার', n, '#c0392b'],
     ['💰 মোট আয় (৳)', totalRevenue, '#27ae60'],
@@ -406,19 +460,15 @@ function buildDashboard(dash, orderSheet) {
     var cardVal = cards[ci][0];
     var cardNum = cards[ci][1].toString();
     var cardClr = cards[ci][2];
-    // Label cell
     dash.getRange(col+crow).setValue(cardVal).setFontSize(10).setFontColor('#7f6b5e')
       .setBackground('#fff').setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
-    // Value cell (next column — no merge, so value stays)
     dash.getRange(col+crow).offset(0,1).setValue(cardNum).setFontSize(24).setFontWeight('bold')
       .setFontColor(cardClr).setBackground('#fff')
       .setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
-    // Clear adjacent empty cells so old merges don't interfere
     dash.getRange(col+crow).offset(0,2).clear();
     dash.setRowHeight(crow,55);
   }
 
-  // ── Section: স্ট্যাটাস ওভারভিউ ──
   var row=7;
   mergeAndStyle(dash,'A'+row,'F'+row,'📊 স্ট্যাটাস ওভারভিউ',14,'#2d1b0e','#f0e4d9',true,30);
   row++;
@@ -432,7 +482,6 @@ function buildDashboard(dash, orderSheet) {
     ['✅ ডেলিভারড',delivered,'#27ae60','#d5f5e3'],
     ['❌ বাতিল',canceled,'#c0392b','#f2d7d5']
   ];
-  // Count processing & shipped from rows
   for (var rr=0; rr<rows.length; rr++) {
     var st = (rows[rr][14]||'').toString().trim();
     if (st==='🔧 প্রসেসিং') stats[1][1]++;
@@ -449,7 +498,6 @@ function buildDashboard(dash, orderSheet) {
     dash.getRange('A'+sr+':F'+sr).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  // ── Section: পেমেন্ট মেথড ──
   row = sr+2;
   mergeAndStyle(dash,'A'+row,'F'+row,'💳 পেমেন্ট মেথড',14,'#2d1b0e','#f0e4d9',true,30);
   row++;
@@ -467,7 +515,6 @@ function buildDashboard(dash, orderSheet) {
     dash.getRange('A'+pr+':F'+pr).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  // ── Section: ডেলিভারি এরিয়া ──
   row = pr+2;
   mergeAndStyle(dash,'A'+row,'F'+row,'🚚 ডেলিভারি এরিয়া (টপ ১০)',14,'#2d1b0e','#f0e4d9',true,30);
   row++;
@@ -485,7 +532,6 @@ function buildDashboard(dash, orderSheet) {
     dash.getRange('A'+ar+':F'+ar).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID);
   }
 
-  // ── Section: জনপ্রিয় প্রোডাক্ট ──
   row = ar+2;
   mergeAndStyle(dash,'A'+row,'F'+row,'🏆 জনপ্রিয় প্রোডাক্ট',14,'#2d1b0e','#f0e4d9',true,30);
   row++;
@@ -512,7 +558,6 @@ function buildDashboard(dash, orderSheet) {
     dash.getRange('A'+pr2+':F'+pr2).setBorder(true,true,true,true,null,null,'#eee5dd',SpreadsheetApp.BorderStyle.SOLID).setBackground(pii%2===0?'#fdf8f4':'#fff');
   }
 
-  // ── Section: গত ৭ দিনের ট্রেন্ড ──
   row = pr2+2;
   mergeAndStyle(dash,'A'+row,'F'+row,'📆 গত ৭ দিনের অর্ডার ট্রেন্ড',14,'#2d1b0e','#f0e4d9',true,30);
   row++;
@@ -541,63 +586,10 @@ function buildDashboard(dash, orderSheet) {
   dash.setColumnWidth(2,180);
   dash.setColumnWidth(5,120);
 }
-```
 
-4. **Deploy > New deployment** > Type: **Web app**
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-   - **Deploy**
-5. **ওয়েব অ্যাপের URL** কপি করে `index.html` ফাইলে `YOUR_GOOGLE_APPS_SCRIPT_ID` জায়গায় বসান
-
-> **⚠️ পুরনো ডেটা থাকলে:** এই ভার্সনে কলাম的结构 বদলেছে। আগের শীট থাকলে **নতুন শীট তৈরি** করে সেটআপ করুন, অথবা আগের শীটের ডেটা ব্যাকআপ নিয়ে কলাম এডিট করে নিন।
-
-### স্ট্যাটাস ড্রপডাউন + WhatsApp লিংক সেটআপ
-
-প্রথমবার ডিপ্লয়ের পর **একবার** `setupTrigger()` ফাংশন রান করান:
-1. Apps Script এডিটরে **Execute > Run function > setupTrigger** সিলেক্ট করুন
-2. অনুমতি দিলে automatically `onEdit` ট্রিগার সেট হবে
-3. এর পর থেকে শীটে স্ট্যাটাস পরিবর্তন করলেই অটো কালার হয়ে যাবে
-
-### WhatsApp One-Click Send
-
-শীটের **WhatsApp লিংক** কলামে ক্লিক করলেই WhatsApp ওপেন হবে কনফার্মেশন মেসেজ সহ:
-```
-প্রিয় [নাম],
-মৃন্ময়ী - Mrinmoyee
-📋 অর্ডার: [অর্ডার নং]
-
-ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?
-
-📋 অর্ডার বিস্তারিত:
-🆔 অর্ডার: [অর্ডার নং]
-🛒 পণ্য: [প্রোডাক্ট] — [সাইজ] (x[পরিমাণ])
-💰 মোট বিল: ৳[টোটাল]
-🚚 ডেলিভারি: [এরিয়া]
-📍 ঠিকানা: [ঠিকানা]
-💳 পেমেন্ট: [পেমেন্ট]
-
-ঠিকানা ও ডিজাইন ঠিক আছে? কনফার্ম করলে প্রসেসিং শুরু করব।
-ধন্যবাদ! 💛
-```
-
----
-
-## ৩. প্রোডাক্ট ম্যানেজমেন্ট (অ্যাডমিন প্যানেল)
-
-অ্যাডমিন প্যানেল থেকে আপনি নিজেই প্রোডাক্ট এড/এডিট/ডিলিট করতে পারবেন — সোর্সকোড না ছুঁয়ে।
-
-### নতুন Apps Script ফাংশন যোগ করুন
-
-আগের Apps Script কোডের **সবশেষে** নিচের কোড যোগ করুন:
-
-```javascript
 // ========================================
-// Product Management — Admin Panel API v1
+// Product Management API
 // ========================================
-
-var PRODUCT_SHEET = '📦 প্রোডাক্ট';
-var PRODUCT_HEADERS = ['id', 'name', 'description', 'price', 'color', 'colorName', 'category', 'sizes', 'tag', 'image', 'active'];
-var ADMIN_PASSWORD = 'mrinmoyee@2024';
 
 function ensureProductSheet(ss) {
   var sheet = ss.getSheetByName(PRODUCT_SHEET);
@@ -636,7 +628,7 @@ function handleGetProducts(e) {
   var data = sheet.getDataRange().getValues();
   var products = [];
   for (var i = 1; i < data.length; i++) {
-    if (data[i][10] === 'NO') continue; // skip inactive
+    if (data[i][10] === 'NO') continue;
     products.push({
       id: data[i][0],
       name: data[i][1],
@@ -671,7 +663,6 @@ function handleSaveProduct(e) {
       if (parseInt(data[i][0]) === newId) { rowIndex = i + 1; break; }
     }
   } else {
-    // Generate new ID
     var maxId = 0;
     for (var i = 1; i < data.length; i++) {
       if (parseInt(data[i][0]) > maxId) maxId = parseInt(data[i][0]);
@@ -732,34 +723,61 @@ function handleAuth(e) {
 }
 ```
 
-### doGet/doPost আপডেট করুন
+4. **Deploy > New deployment** > Type: **Web app**
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+   - **Deploy**
+5. **ওয়েব অ্যাপের URL** কপি করে `index.html` ফাইলে `YOUR_GOOGLE_APPS_SCRIPT_ID` জায়গায় বসান
 
-আপনার বিদ্যমান `doGet` ফাংশনটি **নিচের মতো করে replace** করুন (শুধু `doGet`, বাকি কোড অক্ষত থাকবে):
+> **⚠️ পুরনো ডেটা থাকলে:** এই ভার্সনে কলাম的结构 বদলেছে। আগের শীট থাকলে **নতুন শীট তৈরি** করে সেটআপ করুন, অথবা আগের শীটের ডেটা ব্যাকআপ নিয়ে কলাম এডিট করে নিন।
 
-```javascript
-function doGet(e) {
-  if (e && e.parameter) {
-    if (e.parameter.action === 'track') return handleTrackRequest(e);
-    if (e.parameter.action === 'getProducts') return handleGetProducts(e);
-    if (e.parameter.action === 'saveProduct') return handleSaveProduct(e);
-    if (e.parameter.action === 'deleteProduct') return handleDeleteProduct(e);
-    if (e.parameter.action === 'auth') return handleAuth(e);
-  }
-  return handleRequest(e);
-}
+### স্ট্যাটাস ড্রপডাউন + WhatsApp লিংক সেটআপ
+
+প্রথমবার ডিপ্লয়ের পর **একবার** `setupTrigger()` ফাংশন রান করান:
+1. Apps Script এডিটরে **Execute > Run function > setupTrigger** সিলেক্ট করুন
+2. অনুমতি দিলে automatically `onEdit` ট্রিগার সেট হবে
+3. এর পর থেকে শীটে স্ট্যাটাস পরিবর্তন করলেই অটো কালার হয়ে যাবে
+
+### WhatsApp One-Click Send (v5)
+
+শীটের **WhatsApp লিংক** কলামে ক্লিক করলেই WhatsApp ওপেন হবে — এখন ইমোজি ঠিকভাবে দেখাবে এবং ৩টি নতুন প্রশ্ন যুক্ত হয়েছে:
+
+```
+প্রিয় [নাম],
+মৃন্ময়ী - Mrinmoyee
+অর্ডার: [অর্ডার নং]
+
+ম্যাম/স্যার, আপনি কি অর্ডারটি কনফার্ম করতে চাচ্ছেন?
+
+অর্ডার বিস্তারিত:
+অর্ডার: [অর্ডার নং]
+পণ্য: [প্রোডাক্ট] - [সাইজ] (x[পরিমাণ])
+মোট বিল: ৳[টোটাল]
+ডেলিভারি: [এরিয়া]
+ঠিকানা: [ঠিকানা]
+পেমেন্ট: [পেমেন্ট]
+
+---- আপনার মতামত দিন ----
+গিফট র‍্যাপিং দরকার? (হ্যাঁ/না):
+কোনো বিশেষ নোট থাকলে লিখুন:
+স্পেশাল প্যাকেজিং দরকার? (হ্যাঁ/না):
+------------------------
+
+ঠিকানা ও ডিজাইন ঠিক আছে? কনফার্ম করলে প্রসেসিং শুরু করব।
+ধন্যবাদ!
 ```
 
-`doPost` ফাংশনটি আপডেট করুন:
+> **ইমোজি ফিক্স:** পুরনো ভার্সনে Google Sheets-এর `ENCODEURL` ফাংশন ইমোজি ঠিকমতো encode করতে পারত না। v5-এ `encodeURIComponent()` ব্যবহার করে Apps Script-এর ভিতরেই URL জেনারেট করা হয়েছে — ফলে WhatsApp-এ ইমোজি প্রশ্নবোধক চিহ্ন (`?`) হিসেবে দেখানোর সমস্যা আর থাকবে না।
 
-```javascript
-function doPost(e) {
-  if (e && e.parameter) {
-    if (e.parameter.action === 'saveProduct') return handleSaveProduct(e);
-    if (e.parameter.action === 'deleteProduct') return handleDeleteProduct(e);
-  }
-  return handleRequest(e);
-}
-```
+> **নতুন:** মেনুতে **📲 WhatsApp লিংক রিজেনারেট** অপশন যোগ করা হয়েছে। পুরনো অর্ডারগুলোর জন্যও লিংক আপডেট করতে চাইলে এটি ব্যবহার করুন।
+
+---
+
+## ৩. প্রোডাক্ট ম্যানেজমেন্ট (অ্যাডমিন প্যানেল)
+
+অ্যাডমিন প্যানেল থেকে আপনি নিজেই প্রোডাক্ট এড/এডিট/ডিলিট করতে পারবেন — সোর্সকোড না ছুঁয়ে।
+
+
 
 ### পুনরায় Deploy করুন
 
@@ -780,6 +798,13 @@ function doPost(e) {
 7. **রিফ্রেশ** — Google Sheets থেকে নতুন ডেটা আনুন
 
 > SEO / জেনারেল ভিজিটররা `admin.html` খুঁজে পাবেন না — শুধু আপনি যারা URL জানেন তারাই অ্যাক্সেস করতে পারেন।
+
+### WhatsApp লিংক রিজেনারেট
+
+Apps Script-এ নতুন **"📲 WhatsApp লিংক রিজেনারেট"** মেনু অপশন যোগ করা হয়েছে। এটি শীটের মধ্যে ম্যানুয়ালি করতেও পারেন:
+1. শীটের **Extensions > Apps Script** খুলুন
+2. `regenerateWhatsAppLinks` ফাংশন রান করুন
+3. সব অর্ডারের জন্য WhatsApp লিংক আপডেট হবে
 
 ---
 
