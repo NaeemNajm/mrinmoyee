@@ -1,17 +1,17 @@
 // ========== Unsplash Image URLs ==========
 const UNSPLASH = {
-    hero: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80',
-    about: 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=600&q=80',
+    hero: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80',
+    about: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
 };
 
 const unsplashProducts = [
     'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80',
-    'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400&q=80',
+    'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&q=80',
     'https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?w=400&q=80',
+    'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400&q=80',
     'https://images.unsplash.com/photo-1567721913486-6585f069b332?w=400&q=80',
     'https://images.unsplash.com/photo-1562007908-17c67e878c88?w=400&q=80',
+    'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80',
 ];
 
 // ========== Product Data ==========
